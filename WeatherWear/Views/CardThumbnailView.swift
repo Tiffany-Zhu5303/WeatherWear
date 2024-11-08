@@ -26,5 +26,5 @@ struct CardThumbnailView: View {
 }
 
 #Preview {
-  CardThumbnailView(card: initialCards[0])
+  CardThumbnailView(card: initialItemCards[0])
 }

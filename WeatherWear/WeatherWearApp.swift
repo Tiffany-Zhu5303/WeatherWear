@@ -13,8 +13,7 @@ struct WeatherWearApp: App {
   
   var body: some Scene {
     WindowGroup {
-      ContentView()
-        .environmentObject(store)
+      AppLoadingView()
     }
   }
 }

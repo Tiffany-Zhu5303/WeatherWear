@@ -8,7 +8,7 @@
 import SwiftUI
 
 struct ResizableView: ViewModifier {
-  @State private var transform = Transform()
+  @Binding var transform: Transform
   @State private var previousOffset: CGSize = .zero
   @State private var previousRotation: Angle = .zero
   @State private var scale: CGFloat = 1.0
@@ -52,23 +52,34 @@ struct ResizableView: ViewModifier {
         width: transform.size.width,
         height: transform.size.height
       )
+      .onAppear {
+        previousOffset = transform.offset
+      }
       .rotationEffect(transform.rotation)
       .scaleEffect(scale)
       .offset(transform.offset)
       .gesture(dragGesture)
       .gesture(SimultaneousGesture(rotationGesture, scaleGesture))
-//      .foregroundStyle(Color(color))
   }
 }
 
 extension View {
-  func resizableView() -> some View {
-    modifier(ResizableView())
+  func resizableView(transform: Binding<Transform>) -> some View {
+    modifier(ResizableView(transform: transform))
   }
 }
 
-#Preview {
-  RoundedRectangle(cornerRadius: 30.0)
-    .foregroundStyle(Color("MintGreen"))
-    .resizableView()
+struct Item_Previews: PreviewProvider {
+  struct ItemPreview: View {
+    @EnvironmentObject var store: CardStore
+    
+    var body: some View {
+      CardElementView(element: initialElements[0])
+        .resizableView(transform: $store.itemsCards[0].elements[0].transform)
+    }
+  }
+  static var previews: some View {
+    ItemPreview()
+      .environmentObject(CardStore(defaultData: true))
+  }
 }

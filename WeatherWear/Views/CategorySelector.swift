@@ -7,34 +7,47 @@
 
 import SwiftUI
 
-enum CategoryState {
-  case items, outfits, favorites
+enum CategoryState: Int, CaseIterable {
+  case outfits
+  case items
+  case favorites
 }
 
 struct CategorySelector: View {
   @Binding var categoryState: CategoryState
   
-  var body: some View {
-    Picker(selection: $categoryState, label: Text("")) {
-      Image(systemName: "door.sliding.left.hand.closed")
-        .symbolRenderingMode(.monochrome)
-        .tint(Color(.red))
-        .tag(CategoryState.outfits)
-      Image(systemName: "hanger")
-        .symbolRenderingMode(.monochrome)
-        .foregroundStyle(Color("PaynesGray"))
-        .tag(CategoryState.items)
-      Image(systemName: "heart.fill")
-        .symbolRenderingMode(.monochrome)
-        .foregroundColor(Color("PaynesGray"))
-        .tag(CategoryState.favorites)
+  func iconName(for category: CategoryState) -> String {
+    switch category {
+    case .items: return "hanger"
+    case .outfits: return "door.sliding.left.hand.closed"
+    case .favorites: return "heart.fill"
     }
-    .pickerStyle(.segmented)
-    .frame(width: 300)
   }
+  
+  var body: some View {
+    HStack {
+      ForEach(CategoryState.allCases, id: \.self) { category in
+        Button(action: {
+          categoryState = category
+        }) {
+          Image(systemName: iconName(for: category))
+            .resizable()
+            .scaledToFit()
+            .frame(width: 15, height: 30)
+            .foregroundColor(Color("Moonstone"))
+            .padding(EdgeInsets(top: 5, leading: 38, bottom: 5, trailing: 38))
+            .background(categoryState == category ? Color("MintGreen") : Color.clear)
+            .cornerRadius(10)
+        }
+        .buttonStyle(PlainButtonStyle())
+      }
+    }
+    .background(Color.gray.opacity(0.1))
+    .cornerRadius(10)
+  }
+  
 }
 
 #Preview {
   CategorySelector(categoryState: .constant(.items))
-//    .background(Color("PaynesGray"))
 }

@@ -12,24 +12,9 @@ struct SingleCardView: View {
   @EnvironmentObject var store: CardStore
   @Binding var card: Card
   
-  var content: some View {
-    ZStack {
-      Group {
-        Capsule()
-          .foregroundStyle(Color("MintGreen"))
-        Text("Resize Me!")
-          .fontWeight(.bold)
-          .font(.system(size: 500))
-          .minimumScaleFactor(0.01)
-          .lineLimit(1)
-      }
-      .resizableView()
-    }
-  }
-  
   var body: some View {
     NavigationStack {
-      card.backgroundColor
+      CardDetailView(card: $card)
         .toolbar {
           ToolbarItem(placement: .navigationBarTrailing) {
             Button("Done") { dismiss() }
@@ -39,6 +24,16 @@ struct SingleCardView: View {
   }
 }
 
-#Preview {
-  SingleCardView(card: .constant(initialCards[0]))
+struct SingleCardView_Previews: PreviewProvider {
+  struct SingleCardViewPreview: View {
+    @EnvironmentObject var store: CardStore
+    
+    var body: some View {
+      SingleCardView(card: $store.itemsCards[0])
+    }
+  }
+  static var previews: some View {
+    SingleCardViewPreview()
+      .environmentObject(CardStore(defaultData: true))
+  }
 }

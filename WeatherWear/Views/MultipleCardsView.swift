@@ -21,14 +21,14 @@ struct MultipleCardsView: View {
   }
   
   private var selectedCategoryCards: [Card] {
-      switch categoryState {
-      case .outfits:
-          return store.outfitCards
-      case .items:
-          return store.itemsCards
-      case .favorites:
-          return store.favoriteCards
-      }
+    switch categoryState {
+    case .outfits:
+      return store.outfitCards
+    case .items:
+      return store.itemsCards
+    case .favorites:
+      return store.favoriteCards
+    }
   }
   
   var cardList: some View {
@@ -53,13 +53,22 @@ struct MultipleCardsView: View {
   var body: some View {
     VStack{
       CategorySelector(categoryState: $categoryState)
+        .padding(.top)
       Spacer()
       Group {
         cardList
       }
       .fullScreenCover(item: $selectedCard) { card in
         if let index = store.index(for: card, type: categoryState) {
-          SingleCardView(card: $store.itemsCards[index])
+          
+          if(categoryState == .outfits){
+            SingleCardView(card: $store.outfitCards[index])
+          } else if (categoryState == .items) {
+            SingleCardView(card: $store.itemsCards[index])
+          } else if (categoryState == .favorites) {
+            SingleCardView(card: $store.favoriteCards[index])
+          }
+          
         } else {
           fatalError("Unable to locate selected item")
         }
