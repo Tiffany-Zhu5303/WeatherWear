@@ -6,14 +6,14 @@
 //
 
 import SwiftUI
+import SwiftData
 
 @main
 struct WeatherWearApp: App {
-  @StateObject var store = CardStore(defaultData: true)
-  
   var body: some Scene {
     WindowGroup {
       AppLoadingView()
+        .modelContainer(for: [Item.self, ItemCategory.self], inMemory: false)
     }
   }
 }

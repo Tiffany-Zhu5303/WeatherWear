@@ -6,12 +6,13 @@
 //
 
 import SwiftUI
+import SwiftData
 
 struct MultipleCardsView: View {
   @State private var categoryState = CategoryState.outfits
-  @State private var isPresented: Bool = false
-  @State private var selectedCard: Card?
-  @EnvironmentObject var store: CardStore
+  @State private var openAddNewItemForm: Bool = false
+  @Environment(\.modelContext) var modelContext
+  @Query var items: [Item]
   
   var columns: [GridItem] {
     [
@@ -20,58 +21,53 @@ struct MultipleCardsView: View {
     ]
   }
   
-  private var selectedCategoryCards: [Card] {
-    switch categoryState {
-    case .outfits:
-      return store.outfitCards
-    case .items:
-      return store.itemsCards
-    case .favorites:
-      return store.favoriteCards
-    }
-  }
-  
-  var cardList: some View {
-    ScrollView(showsIndicators: false){
+  var itemList: some View {
+    ScrollView(showsIndicators: false) {
       LazyVGrid(columns: columns, spacing: 20) {
-          ForEach(selectedCategoryCards) {card in
-            CardThumbnailView(card: card)
+        ForEach(items) { item in
+          VStack(alignment: .leading) {
+            CardThumbnailView()
               .frame(
                 width: Settings.thumbnailSize.width,
                 height: Settings.thumbnailSize.height
               )
-              .onTapGesture {
-                selectedCard = card
-              }
           }
+        }
+        ZStack {
+          CardThumbnailView()
+            .frame(
+              width: Settings.thumbnailSize.width,
+              height: Settings.thumbnailSize.height
+            )
+          Image(systemName: "plus.circle.fill")
+            .foregroundStyle(Color("Moonstone"))
+        }
+        .onTapGesture {
+          openAddNewItemForm = true
+        }
       }
-      .padding(.top, 20)
+      .padding(.top)
     }
-    .padding(.top, 20)
   }
   
   var body: some View {
-    VStack{
-      CategorySelector(categoryState: $categoryState)
-        .padding(.top)
-      Spacer()
-      Group {
-        cardList
-      }
-      .fullScreenCover(item: $selectedCard) { card in
-        if let index = store.index(for: card, type: categoryState) {
-          
-          if(categoryState == .outfits){
-            SingleCardView(card: $store.outfitCards[index])
-          } else if (categoryState == .items) {
-            SingleCardView(card: $store.itemsCards[index])
-          } else if (categoryState == .favorites) {
-            SingleCardView(card: $store.favoriteCards[index])
-          }
-          
-        } else {
-          fatalError("Unable to locate selected item")
+    ZStack {
+      VStack{
+        CategorySelector(categoryState: $categoryState)
+          .padding(.top)
+        Spacer()
+        Group {
+          itemList
         }
+      }
+      if(openAddNewItemForm) {
+        Color.gray.opacity(0.1)
+          .edgesIgnoringSafeArea(.all)
+          .blur(radius: 10)
+          .onTapGesture {
+            openAddNewItemForm = false
+          }
+        AddItemForm()
       }
     }
   }
@@ -79,7 +75,6 @@ struct MultipleCardsView: View {
 
 #Preview {
   MultipleCardsView()
-    .environmentObject(CardStore(defaultData: true))
     .frame(maxWidth: .infinity, maxHeight: .infinity)
     .background(Color.white)
 }

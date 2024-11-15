@@ -6,9 +6,23 @@
 //
 
 import SwiftUI
+import SwiftData
 
 struct AppLoadingView: View {
   @State private var showLaunchScreen: Bool = true
+  @Environment(\.modelContext) private var modelContext
+  @Query private var existingCategories: [ItemCategory]
+  
+  func addDefaultItemCategories() {
+    if(existingCategories.isEmpty){
+      let defaultItems = ["Shirt", "Pants", "Skirt", "Dress", "Shoes", "Bag"]
+      
+      for defaultItem in defaultItems {
+        let item = ItemCategory(name: defaultItem)
+        modelContext.insert(item)
+      }
+    }
+  }
   
   var body: some View {
     if(showLaunchScreen) {
@@ -23,12 +37,13 @@ struct AppLoadingView: View {
         }
     } else {
       MultipleCardsView()
-        .environmentObject(CardStore(defaultData: true))
+        .onAppear{
+          addDefaultItemCategories()
+        }
     }
   }
 }
 
 #Preview {
   AppLoadingView()
-    .environmentObject(CardStore(defaultData: true))
 }
