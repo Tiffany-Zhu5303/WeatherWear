@@ -28,12 +28,12 @@ struct AddImagePopup: View {
             matching: .images,
             photoLibrary: .shared()) {
               Text("Add from Camera Roll")
+              Spacer()
+              Image(systemName: "photo.on.rectangle")
             }
-        //        .onChange(of: selectedImages) { _, _ in
-        //
-        //        }
-          Spacer()
-          Image(systemName: "photo.on.rectangle")
+          //        .onChange(of: selectedImages) { _, _ in
+          //
+          //        }
         }
         HStack {
           Button("Paste") {
@@ -47,9 +47,16 @@ struct AddImagePopup: View {
       .foregroundStyle(Color("Moonstone"))
       .background(Color("AntiFlashWhite"))
     }
-    .frame(maxWidth: .infinity)
-    .edgesIgnoringSafeArea(.bottom)
     .padding(.bottom, 20)
+    .frame(maxWidth: .infinity)
+    .background(
+      RoundedRectangle(cornerRadius: 15)
+        .foregroundStyle(Color.white)
+        .shadow(
+          color: Color.black.opacity(0.2),
+          radius: 5, x: 0.0, y: 0.0)
+        .edgesIgnoringSafeArea(.bottom)
+    )
   }
 }
 
