@@ -6,14 +6,17 @@
 //
 
 import SwiftUI
+import SwiftData
 import PhotosUI
 
 struct AddImagePopup: View {
-  @State private var selectedImages: [PhotosPickerItem] = []
+  @State private var selectedImage: PhotosPickerItem? = nil
+  @Binding var imageData: Data?
+  @Query var items: [Item]
   
   var body: some View {
     VStack {
-      Text("Add Item(s)")
+      Text("Add Item")
         .font(.title2)
         .foregroundStyle(Color("Moonstone"))
         .padding(.top, 20)
@@ -24,19 +27,32 @@ struct AddImagePopup: View {
       Group {
         HStack {
           PhotosPicker(
-            selection: $selectedImages,
+            selection: $selectedImage,
             matching: .images,
             photoLibrary: .shared()) {
               Text("Add from Camera Roll")
               Spacer()
               Image(systemName: "photo.on.rectangle")
             }
-          //        .onChange(of: selectedImages) { _, _ in
-          //
-          //        }
+            .onChange(of: selectedImage) { newItem, _ in
+              if let newItem {
+                Task {
+                  if let data = try? await newItem.loadTransferable(type: Data.self) {
+                    imageData = data
+                    print("Image data added in AddImagePopup, size: (\(data.count)) bytes")
+                  } else {
+                    print("Failed to load image data in AddImagePopup")
+                  }
+                }
+              }
+            }
         }
         HStack {
           Button("Paste") {
+            if let image = UIPasteboard.general.image,
+               let data = image.jpegData(compressionQuality: 1.0) {
+              imageData = data
+            }
           }
           Spacer()
           Image(systemName: "document.on.clipboard")
@@ -61,5 +77,5 @@ struct AddImagePopup: View {
 }
 
 #Preview {
-  AddImagePopup()
+  AddImagePopup(imageData: .constant(nil))
 }

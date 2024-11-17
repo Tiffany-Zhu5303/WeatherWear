@@ -9,9 +9,11 @@ import Foundation
 import SwiftData
 
 @Model
-class ItemCategory: Identifiable {
+// Equatable to compare objects
+class ItemCategory: Identifiable, Equatable {
   @Attribute var id: UUID = UUID()
   @Attribute var name: String
+  @Relationship var items: [Item] = []
   
   init(name: String = ""){
     self.name = name

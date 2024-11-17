@@ -11,6 +11,8 @@ import SwiftData
 struct MultipleCardsView: View {
   @State private var categoryState = CategoryState.outfits
   @State private var openAddNewItemForm: Bool = false
+  @State private var openItemFullscreen: Bool = false
+  @State private var selectedItem: Item? = nil
   @Environment(\.modelContext) var modelContext
   @Query var items: [Item]
   
@@ -24,13 +26,16 @@ struct MultipleCardsView: View {
   var itemList: some View {
     ScrollView(showsIndicators: false) {
       LazyVGrid(columns: columns, spacing: 20) {
-        ForEach(items) { item in
+        ForEach(items.indices, id: \.self) { index in
           VStack(alignment: .leading) {
             CardThumbnailView()
               .frame(
                 width: Settings.thumbnailSize.width,
                 height: Settings.thumbnailSize.height
               )
+              .onTapGesture {
+                selectedItem = items[index]
+              }
           }
         }
         ZStack {
@@ -58,6 +63,17 @@ struct MultipleCardsView: View {
         Spacer()
         Group {
           itemList
+        }
+      }
+      .onChange(of: selectedItem) { item, _ in
+        if item != nil {
+          openItemFullscreen = true
+        }
+      }
+      .fullScreenCover(isPresented: $openItemFullscreen) {
+        if selectedItem != nil {
+          ItemView(item: $selectedItem)
+            .zIndex(1)
         }
       }
       if(openAddNewItemForm) {

@@ -12,11 +12,13 @@ import SwiftData
 @Model
 class Item: Identifiable {
   @Attribute var id: UUID = UUID()
-  @Attribute var type: String
   @Attribute var dateAdded: Date
+  @Attribute var image: Data
+  @Relationship var category: ItemCategory
 
-  init(type: String, dateAdded: Date = .now) {
-    self.type = type
+  init(dateAdded: Date = .now, image: Data? = nil, category: ItemCategory = ItemCategory(name: "Default")) {
     self.dateAdded = dateAdded
+    self.image = image ?? UIImage(systemName: "hanger")?.pngData() ?? UIImage(named:"error-image")!.pngData()!
+    self.category = category
   }
 }

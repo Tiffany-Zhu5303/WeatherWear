@@ -15,7 +15,7 @@ struct SingleCardView: View {
   var body: some View {
     NavigationStack {
       CardDetailView(card: $card)
-        .toolbar {
+      .toolbar {
           ToolbarItem(placement: .navigationBarTrailing) {
             Button("Done") { dismiss() }
           }
