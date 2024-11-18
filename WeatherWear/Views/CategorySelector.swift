@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import SwiftData
 
 enum CategoryState: Int, CaseIterable {
   case outfits
@@ -15,6 +16,7 @@ enum CategoryState: Int, CaseIterable {
 
 struct CategorySelector: View {
   @Binding var categoryState: CategoryState
+  @Environment(\.modelContext) var modelContext
   
   func iconName(for category: CategoryState) -> String {
     switch category {

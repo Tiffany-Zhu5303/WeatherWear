@@ -69,17 +69,17 @@ extension View {
   }
 }
 
-struct Item_Previews: PreviewProvider {
-  struct ItemPreview: View {
-    @EnvironmentObject var store: CardStore
-    
-    var body: some View {
-      CardElementView(element: initialElements[0])
-        .resizableView(transform: $store.itemsCards[0].elements[0].transform)
-    }
-  }
-  static var previews: some View {
-    ItemPreview()
-      .environmentObject(CardStore(defaultData: true))
-  }
-}
+//struct Item_Previews: PreviewProvider {
+//  struct ItemPreview: View {
+//    @EnvironmentObject var store: CardStore
+//    
+//    var body: some View {
+//      CardElementView(element: initialElements[0])
+//        .resizableView(transform: $store.itemsCards[0].elements[0].transform)
+//    }
+//  }
+//  static var previews: some View {
+//    ItemPreview()
+//      .environmentObject(CardStore(defaultData: true))
+//  }
+//}

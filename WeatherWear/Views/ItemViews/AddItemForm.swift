@@ -15,6 +15,7 @@ struct AddItemForm: View {
   @State private var selectedType: ItemCategory? = nil
   @State private var imageData: Data? = nil
   @State private var openImagePopup: Bool = false
+  @Binding var showForm: Bool
   
   var defaultOptions = ["Shirt", "Pants", "Shoes"]
   
@@ -28,6 +29,7 @@ struct AddItemForm: View {
     
     let newItem = Item(image: selectedImage, category: selectedType)
     modelContext.insert(newItem)
+    print("Inserted new item: \(newItem.id) with category: \(newItem.category.name)")
   }
   
   var body: some View {
@@ -71,9 +73,12 @@ struct AddItemForm: View {
             if let imageData = imageData,
                let uiImage = UIImage.from(data: imageData) {
               Image(uiImage: uiImage)
+                .resizable()
+                .scaledToFit()
+                .frame(width: 250, height: 250)
             }else {
-            Image(systemName: "plus.circle.fill")
-              .foregroundStyle(Color("Moonstone"))
+              Image(systemName: "plus.circle.fill")
+                .foregroundStyle(Color("Moonstone"))
           }
         }
         .contentShape(Rectangle())
@@ -91,6 +96,7 @@ struct AddItemForm: View {
       .padding(.top, 20)
       Button("Add item") {
         addItem()
+        showForm = false
       }
       .padding(.top, 20)
     }
@@ -113,7 +119,7 @@ struct AddItemForm: View {
         }
       VStack {
         Spacer()
-        AddImagePopup(imageData: $imageData)
+        AddImagePopup(imageData: $imageData, showPopup: $openImagePopup)
           .transition(.move(edge: .bottom))
       }
       .zIndex(1)
@@ -129,6 +135,6 @@ struct AddItemForm: View {
 
 struct AddItemForm_Previews: PreviewProvider {
   static var previews: some View {
-    AddItemForm()
+    AddItemForm(showForm: .constant(true))
   }
 }

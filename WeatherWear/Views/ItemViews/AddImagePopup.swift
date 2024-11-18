@@ -12,6 +12,7 @@ import PhotosUI
 struct AddImagePopup: View {
   @State private var selectedImage: PhotosPickerItem? = nil
   @Binding var imageData: Data?
+  @Binding var showPopup: Bool
   @Query var items: [Item]
   
   var body: some View {
@@ -34,15 +35,23 @@ struct AddImagePopup: View {
               Spacer()
               Image(systemName: "photo.on.rectangle")
             }
-            .onChange(of: selectedImage) { newItem, _ in
-              if let newItem {
-                Task {
-                  if let data = try? await newItem.loadTransferable(type: Data.self) {
+            .onChange(of: selectedImage) {
+              guard let selectedImage = selectedImage
+              else {
+                print("No image selected.")
+                return
+              }
+              Task {
+                do {
+                  if let data = try await selectedImage.loadTransferable(type: Data.self) {
                     imageData = data
                     print("Image data added in AddImagePopup, size: (\(data.count)) bytes")
-                  } else {
+                    showPopup = false
+                  }else {
                     print("Failed to load image data in AddImagePopup")
                   }
+                } catch {
+                  print("Error loading image data: \(error.localizedDescription).")
                 }
               }
             }
@@ -77,5 +86,5 @@ struct AddImagePopup: View {
 }
 
 #Preview {
-  AddImagePopup(imageData: .constant(nil))
+  AddImagePopup(imageData: .constant(nil), showPopup: .constant(true))
 }

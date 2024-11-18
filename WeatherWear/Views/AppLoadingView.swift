@@ -27,8 +27,17 @@ struct AppLoadingView: View {
     
     if(existingItems.isEmpty) {
       for defaultItem in initialItems {
-        modelContext.insert(defaultItem)
-        print("Inserted Item: \(defaultItem.id) and \(defaultItem.category.name)")
+        let categoryName = defaultItem.category.name
+        let category = modelContext.fetchCategory(named: categoryName) ?? {
+          let newCategory = ItemCategory(name: categoryName)
+          modelContext.insert(newCategory)
+          return newCategory
+        }()
+        
+        let newItem = Item(dateAdded: defaultItem.dateAdded, image: defaultItem.image, category: category)
+        
+        modelContext.insert(newItem)
+        print("Inserted Item: \(newItem.id) and \(defaultItem.category.name)")
       }
     }
     

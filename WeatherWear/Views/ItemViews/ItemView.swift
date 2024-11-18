@@ -9,8 +9,27 @@ import SwiftUI
 
 struct ItemView: View {
   @Environment(\.dismiss) var dismiss
+  @Environment(\.modelContext) var modelContext
   @Binding var item: Item?
   
+  private func deleteItem() {
+    guard let itemToDelete = item
+    else {
+      print("Deleting item failed")
+      return
+    }
+    
+    modelContext.delete(itemToDelete)
+    
+    do {
+      try modelContext.save()
+      print("Successfully deleted item!")
+      dismiss()
+    } catch {
+      print("Failed to delete item: \(error.localizedDescription)")
+    }
+  }
+
   var body: some View {
     NavigationStack {
       if let item = item {
@@ -24,6 +43,12 @@ struct ItemView: View {
           }
         }
         .toolbar {
+          ToolbarItem(placement: .navigationBarLeading) {
+            Button("Delete Item") {
+              deleteItem()
+            }
+            .foregroundStyle(Color(.red))
+          }
           ToolbarItem(placement: .navigationBarTrailing) {
             Button("Done") { dismiss() }
           }

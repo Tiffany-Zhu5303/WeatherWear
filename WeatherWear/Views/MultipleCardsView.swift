@@ -15,6 +15,14 @@ struct MultipleCardsView: View {
   @State private var selectedItem: Item? = nil
   @Environment(\.modelContext) var modelContext
   @Query var items: [Item]
+  @Query var outfits: [Outfit]
+  @Query var favorites: [Favorite]
+
+  enum ModelType {
+    case outfits
+    case items
+    case favorites
+  }
   
   var columns: [GridItem] {
     [
@@ -23,33 +31,125 @@ struct MultipleCardsView: View {
     ]
   }
   
+  var addItemCard: some View {
+    ZStack {
+      CardThumbnailView()
+        .frame(
+          width: Settings.thumbnailSize.width,
+          height: Settings.thumbnailSize.height
+        )
+      Image(systemName: "plus.circle.fill")
+        .foregroundStyle(Color("Moonstone"))
+    }
+    .onTapGesture {
+      openAddNewItemForm = true
+    }
+  }
+  
+  var displayItems: some View {
+    ForEach(items.indices, id: \.self) { index in
+      VStack(alignment: .leading) {
+        CardThumbnailView()
+          .frame(
+            width: Settings.thumbnailSize.width,
+            height: Settings.thumbnailSize.height
+          )
+          .overlay(
+            Group {
+              if let uiImage = UIImage(data: items[index].image) {
+                Image(uiImage: uiImage)
+                  .resizable()
+                  .scaledToFill()
+                  .frame(
+                    width: Settings.thumbnailImageSize.width,
+                    height: Settings.thumbnailImageSize.height)
+              } else {
+                Text("No Image")
+                  .foregroundColor(.gray)
+              }
+            }
+          )
+          .onTapGesture {
+            selectedItem = items[index]
+          }
+      }
+    }
+  }
+  
+  var displayOutfits: some View {
+    ForEach(outfits.indices, id: \.self) { index in
+      VStack(alignment: .leading) {
+        CardThumbnailView()
+          .frame(
+            width: Settings.thumbnailSize.width,
+            height: Settings.thumbnailSize.height
+          )
+          .overlay(
+            Group {
+//              if let uiImage = UIImage(data: outfits[index].image) {
+//                Image(uiImage: uiImage)
+//                  .resizable()
+//                  .scaledToFill()
+//                  .frame(
+//                    width: Settings.thumbnailImageSize.width,
+//                    height: Settings.thumbnailImageSize.height)
+//              } else {
+                Text("No Image")
+                  .foregroundColor(.gray)
+//              }
+            }
+          )
+          .onTapGesture {
+            selectedItem = items[index]
+          }
+      }
+    }
+  }
+  
+  var displayFavorites: some View {
+    ForEach(favorites.indices, id: \.self) { index in
+      VStack(alignment: .leading) {
+        CardThumbnailView()
+          .frame(
+            width: Settings.thumbnailSize.width,
+            height: Settings.thumbnailSize.height
+          )
+          .overlay(
+            Group {
+//              if let uiImage = UIImage(data: favorites[index].image) {
+//                Image(uiImage: uiImage)
+//                  .resizable()
+//                  .scaledToFill()
+//                  .frame(
+//                    width: Settings.thumbnailImageSize.width,
+//                    height: Settings.thumbnailImageSize.height)
+//              } else {
+                Text("No Image")
+                  .foregroundColor(.gray)
+//              }
+            }
+          )
+          .onTapGesture {
+            selectedItem = items[index]
+          }
+      }
+    }
+  }
+  
   var itemList: some View {
     ScrollView(showsIndicators: false) {
       LazyVGrid(columns: columns, spacing: 20) {
-        ForEach(items.indices, id: \.self) { index in
-          VStack(alignment: .leading) {
-            CardThumbnailView()
-              .frame(
-                width: Settings.thumbnailSize.width,
-                height: Settings.thumbnailSize.height
-              )
-              .onTapGesture {
-                selectedItem = items[index]
-              }
+        Group {
+          switch categoryState {
+          case .outfits:
+            displayOutfits
+          case .items:
+            displayItems
+          case .favorites:
+            displayFavorites
           }
         }
-        ZStack {
-          CardThumbnailView()
-            .frame(
-              width: Settings.thumbnailSize.width,
-              height: Settings.thumbnailSize.height
-            )
-          Image(systemName: "plus.circle.fill")
-            .foregroundStyle(Color("Moonstone"))
-        }
-        .onTapGesture {
-          openAddNewItemForm = true
-        }
+        addItemCard
       }
       .padding(.top)
     }
@@ -83,7 +183,7 @@ struct MultipleCardsView: View {
           .onTapGesture {
             openAddNewItemForm = false
           }
-        AddItemForm()
+        AddItemForm(showForm: $openAddNewItemForm)
       }
     }
   }
