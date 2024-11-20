@@ -11,8 +11,11 @@ import SwiftData
 struct MultipleCardsView: View {
   @State private var categoryState = CategoryState.outfits
   @State private var openAddNewItemForm: Bool = false
+  @State private var openAddNewOutfitForm: Bool = false
   @State private var openItemFullscreen: Bool = false
   @State private var selectedItem: Item? = nil
+  @State private var selectedOutfit: Outfit? = nil
+  @State private var selectedFavorite: Favorite? = nil
   @Environment(\.modelContext) var modelContext
   @Query var items: [Item]
   @Query var outfits: [Outfit]
@@ -46,6 +49,21 @@ struct MultipleCardsView: View {
     }
   }
   
+  var addOutfitCard: some View {
+    ZStack {
+      CardThumbnailView()
+        .frame(
+          width: Settings.thumbnailSize.width,
+          height: Settings.thumbnailSize.height
+        )
+      Image(systemName: "plus.circle.fill")
+        .foregroundStyle(Color("Moonstone"))
+    }
+    .onTapGesture {
+      openAddNewOutfitForm = true
+    }
+  }
+  
   var displayItems: some View {
     ForEach(items.indices, id: \.self) { index in
       VStack(alignment: .leading) {
@@ -59,10 +77,11 @@ struct MultipleCardsView: View {
               if let uiImage = UIImage(data: items[index].image) {
                 Image(uiImage: uiImage)
                   .resizable()
-                  .scaledToFill()
+                  .scaledToFit()
                   .frame(
-                    width: Settings.thumbnailImageSize.width,
-                    height: Settings.thumbnailImageSize.height)
+                    width: Settings.thumbnailSize.width * 0.8,
+                    height: Settings.thumbnailSize.height * 0.8)
+                  .clipped()
               } else {
                 Text("No Image")
                   .foregroundColor(.gray)
@@ -143,13 +162,15 @@ struct MultipleCardsView: View {
           switch categoryState {
           case .outfits:
             displayOutfits
+            addOutfitCard
           case .items:
             displayItems
+            addItemCard
           case .favorites:
             displayFavorites
+            addItemCard
           }
         }
-        addItemCard
       }
       .padding(.top)
     }
@@ -184,6 +205,15 @@ struct MultipleCardsView: View {
             openAddNewItemForm = false
           }
         AddItemForm(showForm: $openAddNewItemForm)
+      }
+      if(openAddNewOutfitForm) {
+        Color.gray.opacity(0.1)
+          .edgesIgnoringSafeArea(.all)
+          .blur(radius: 10)
+          .onTapGesture {
+            openAddNewOutfitForm = false
+          }
+        AddOutfitForm(showForm: $openAddNewOutfitForm)
       }
     }
   }
