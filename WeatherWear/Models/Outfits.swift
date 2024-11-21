@@ -17,7 +17,11 @@ class Outfit: Identifiable {
   @Attribute var transforms: [UUID: Transform] = [:]
   @Relationship var items: [Item]
   
-  init(name: String = "", dateAdded: Date = .now, items: [Item] = []){
+  init(
+    name: String = "\(Date().formatted(date: .abbreviated, time: .shortened)) outfit",
+    dateAdded: Date = .now,
+    items: [Item] = []
+  ){
     self.name = name
     self.dateAdded = dateAdded
     self.items = items

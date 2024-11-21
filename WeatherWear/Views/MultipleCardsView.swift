@@ -13,6 +13,7 @@ struct MultipleCardsView: View {
   @State private var openAddNewItemForm: Bool = false
   @State private var openAddNewOutfitForm: Bool = false
   @State private var openItemFullscreen: Bool = false
+  @State private var newOutfit: Outfit = Outfit(name: "\(Date().formatted(date: .abbreviated, time: .shortened))'s outfit")
   @State private var selectedItem: Item? = nil
   @State private var selectedOutfit: Outfit? = nil
   @State private var selectedFavorite: Favorite? = nil
@@ -213,7 +214,10 @@ struct MultipleCardsView: View {
           .onTapGesture {
             openAddNewOutfitForm = false
           }
-        AddOutfitForm(showForm: $openAddNewOutfitForm)
+        AddOutfitForm(
+          showForm: $openAddNewOutfitForm,
+          outfit: $newOutfit
+        )
       }
     }
   }

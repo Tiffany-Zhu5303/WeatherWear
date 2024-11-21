@@ -11,16 +11,16 @@ struct OutfitView: View {
   @Environment(\.dismiss) var dismiss
   @Environment(\.modelContext) var modelContext
   @State private var currentModal: ItemSelection?
-  @Binding var outfit: Outfit?
+  @Binding var outfit: Outfit
   
   private func deleteOutfit() {
-    guard let outfitToDelete = outfit
-    else {
-      print("Deleting outfit failed")
-      return
-    }
+//    guard let outfitToDelete = outfit
+//    else {
+//      print("Deleting outfit failed")
+//      return
+//    }
     
-    modelContext.delete(outfitToDelete)
+    modelContext.delete(outfit)
     
     do {
       try modelContext.save()
@@ -34,7 +34,7 @@ struct OutfitView: View {
   var body: some View {
     ZStack {
       NavigationStack {
-        if let outfit = outfit {
+//        if let outfit = outfit {
           ZStack(alignment: .bottom) {
             VStack {
               ZStack {
@@ -69,10 +69,10 @@ struct OutfitView: View {
             ItemToolbar(modal: $currentModal)
               .ignoresSafeArea()
           }
-        } else {
-          Text("Error with selected item")
-            .foregroundStyle(Color(.red))
-        }
+//        } else {
+//          Text("Error with selected item")
+//            .foregroundStyle(Color(.red))
+//        }
       }
     }
   }
