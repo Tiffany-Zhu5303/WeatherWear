@@ -9,9 +9,9 @@ import SwiftUI
 import SwiftData
 
 struct OutfitFormInput: View {
-  @State private var switchView: Bool = false
+  @Binding var navigateOutfitView: Bool
+  @Binding var showForm: Bool
   @Binding var outfit: Outfit
-//  @Binding var itemCategories: [ItemCategory:[Item]]
   
   func updateOutfit() {
     
@@ -38,53 +38,35 @@ struct OutfitFormInput: View {
           .fill(Color("MintGreen").opacity(0.5))
       )
       .padding(.vertical, 20)
-      NavigationView {
+      NavigationStack {
         VStack {
-          NavigationLink(destination: OutfitView(outfit: $outfit)) {
-            Button("Create Outfit"){}
-              .padding(5)
-              .background(
-                RoundedRectangle(cornerRadius: 10)
-                  .stroke(Color("Moonstone"), lineWidth: 2)
-              )
+          Button("Create Outfit"){
+            showForm = false
+            
+            DispatchQueue.main.async {
+              navigateOutfitView = true
+            }
+          }
+          .padding(5)
+          .background(
+            RoundedRectangle(cornerRadius: 10)
+              .stroke(Color("Moonstone"), lineWidth: 2)
+          )
+          .navigationDestination(isPresented: $navigateOutfitView) {
+            OutfitView(outfit: $outfit)
           }
         }
-        .navigationBarHidden(true)
       }
-//      Form {
-//        ForEach(Array(itemCategories.keys), id: \.self){ category in
-//          Section(header: Text(category.name)) {
-//            Menu {
-//              ForEach(itemCategories[category] ?? [], id: \.id) { item in
-//                Button(action: {
-//                  print("Selected item: \(item.id)")
-//                }) {
-//                  Text("\(item.id)")
-//                }
-//              }
-//            } label: {
-//              Text("Choose an item")
-//              Image(systemName: "heart")
-//            }
-//          }
-//        }
-//      }
-//      .padding(.top, 30)
-//      .foregroundStyle(Color("Moonstone"))
     }
   }
 }
 
 struct AddOutfitForm: View {
   @Environment(\.modelContext) private var modelContext
-//  @State var itemCategories: [ItemCategory: [Item]] =
-//  [
-//    ItemCategory(name: "shirt") : [Item(image: UIImage(named: "tshirt1")!.pngData()!), Item()],
-//    ItemCategory(name: "pants") : [Item(image: UIImage(named: "tshirt1")!.pngData()!)],
-//    ItemCategory(name: "shoes") : [Item(image: UIImage(named: "tshirt1")!.pngData()!)]
-//  ]
   @Binding var showForm: Bool
+  @Binding var showOutfitForm: Bool
   @Binding var outfit: Outfit
+  @Binding var navigateOutfitView: Bool
   
   var body: some View {
     ZStack(alignment: .top) {
@@ -97,7 +79,7 @@ struct AddOutfitForm: View {
           width: 350,
           height: 220)
       VStack(alignment: .center) {
-        OutfitFormInput(outfit: $outfit)
+        OutfitFormInput(navigateOutfitView: $navigateOutfitView, showForm: $showOutfitForm, outfit: $outfit)
           .font(.title2)
           .fontWeight(.bold)
           .foregroundStyle(Color("Moonstone"))
@@ -115,8 +97,10 @@ struct AddOutfitForm: View {
 #Preview {
   AddOutfitForm(
     showForm: .constant(true),
+    showOutfitForm: .constant(true),
     outfit: .constant(
       Outfit(name: "\(Date().formatted(date: .abbreviated, time: .shortened)) Outfit")
-    )
+    ),
+    navigateOutfitView: .constant(false)
   )
 }

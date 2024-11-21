@@ -14,12 +14,6 @@ struct OutfitView: View {
   @Binding var outfit: Outfit
   
   private func deleteOutfit() {
-//    guard let outfitToDelete = outfit
-//    else {
-//      print("Deleting outfit failed")
-//      return
-//    }
-    
     modelContext.delete(outfit)
     
     do {
@@ -34,7 +28,6 @@ struct OutfitView: View {
   var body: some View {
     ZStack {
       NavigationStack {
-//        if let outfit = outfit {
           ZStack(alignment: .bottom) {
             VStack {
               ZStack {
@@ -69,10 +62,7 @@ struct OutfitView: View {
             ItemToolbar(modal: $currentModal)
               .ignoresSafeArea()
           }
-//        } else {
-//          Text("Error with selected item")
-//            .foregroundStyle(Color(.red))
-//        }
+          .navigationBarBackButtonHidden(true)
       }
     }
   }

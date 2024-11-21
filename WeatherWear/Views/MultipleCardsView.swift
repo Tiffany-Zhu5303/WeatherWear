@@ -17,11 +17,12 @@ struct MultipleCardsView: View {
   @State private var selectedItem: Item? = nil
   @State private var selectedOutfit: Outfit? = nil
   @State private var selectedFavorite: Favorite? = nil
+  @State private var navigateOutfitView: Bool = false
   @Environment(\.modelContext) var modelContext
   @Query var items: [Item]
   @Query var outfits: [Outfit]
   @Query var favorites: [Favorite]
-
+  
   enum ModelType {
     case outfits
     case items
@@ -106,17 +107,17 @@ struct MultipleCardsView: View {
           )
           .overlay(
             Group {
-//              if let uiImage = UIImage(data: outfits[index].image) {
-//                Image(uiImage: uiImage)
-//                  .resizable()
-//                  .scaledToFill()
-//                  .frame(
-//                    width: Settings.thumbnailImageSize.width,
-//                    height: Settings.thumbnailImageSize.height)
-//              } else {
-                Text("No Image")
-                  .foregroundColor(.gray)
-//              }
+              //              if let uiImage = UIImage(data: outfits[index].image) {
+              //                Image(uiImage: uiImage)
+              //                  .resizable()
+              //                  .scaledToFill()
+              //                  .frame(
+              //                    width: Settings.thumbnailImageSize.width,
+              //                    height: Settings.thumbnailImageSize.height)
+              //              } else {
+              Text("No Image")
+                .foregroundColor(.gray)
+              //              }
             }
           )
           .onTapGesture {
@@ -136,17 +137,17 @@ struct MultipleCardsView: View {
           )
           .overlay(
             Group {
-//              if let uiImage = UIImage(data: favorites[index].image) {
-//                Image(uiImage: uiImage)
-//                  .resizable()
-//                  .scaledToFill()
-//                  .frame(
-//                    width: Settings.thumbnailImageSize.width,
-//                    height: Settings.thumbnailImageSize.height)
-//              } else {
-                Text("No Image")
-                  .foregroundColor(.gray)
-//              }
+              //              if let uiImage = UIImage(data: favorites[index].image) {
+              //                Image(uiImage: uiImage)
+              //                  .resizable()
+              //                  .scaledToFill()
+              //                  .frame(
+              //                    width: Settings.thumbnailImageSize.width,
+              //                    height: Settings.thumbnailImageSize.height)
+              //              } else {
+              Text("No Image")
+                .foregroundColor(.gray)
+              //              }
             }
           )
           .onTapGesture {
@@ -178,46 +179,53 @@ struct MultipleCardsView: View {
   }
   
   var body: some View {
-    ZStack {
-      VStack{
-        CategorySelector(categoryState: $categoryState)
-          .padding(.top)
-        Spacer()
-        Group {
-          itemList
-        }
-      }
-      .onChange(of: selectedItem) { item, _ in
-        if item != nil {
-          openItemFullscreen = true
-        }
-      }
-      .fullScreenCover(isPresented: $openItemFullscreen) {
-        if selectedItem != nil {
-          ItemView(item: $selectedItem)
-            .zIndex(1)
-        }
-      }
-      if(openAddNewItemForm) {
-        Color.gray.opacity(0.1)
-          .edgesIgnoringSafeArea(.all)
-          .blur(radius: 10)
-          .onTapGesture {
-            openAddNewItemForm = false
+    NavigationStack {
+      ZStack {
+        VStack{
+          CategorySelector(categoryState: $categoryState)
+            .padding(.top)
+          Spacer()
+          Group {
+            itemList
           }
-        AddItemForm(showForm: $openAddNewItemForm)
-      }
-      if(openAddNewOutfitForm) {
-        Color.gray.opacity(0.1)
-          .edgesIgnoringSafeArea(.all)
-          .blur(radius: 10)
-          .onTapGesture {
-            openAddNewOutfitForm = false
+        }
+        .onChange(of: selectedItem) { item, _ in
+          if item != nil {
+            openItemFullscreen = true
           }
-        AddOutfitForm(
-          showForm: $openAddNewOutfitForm,
-          outfit: $newOutfit
-        )
+        }
+        .fullScreenCover(isPresented: $openItemFullscreen) {
+          if selectedItem != nil {
+            ItemView(item: $selectedItem)
+              .zIndex(1)
+          }
+        }
+        if(openAddNewItemForm) {
+          Color.gray.opacity(0.1)
+            .edgesIgnoringSafeArea(.all)
+            .blur(radius: 10)
+            .onTapGesture {
+              openAddNewItemForm = false
+            }
+          AddItemForm(showForm: $openAddNewItemForm)
+        }
+        if(openAddNewOutfitForm) {
+          Color.gray.opacity(0.1)
+            .edgesIgnoringSafeArea(.all)
+            .blur(radius: 10)
+            .onTapGesture {
+              openAddNewOutfitForm = false
+            }
+          AddOutfitForm(
+            showForm: $openAddNewOutfitForm,
+            showOutfitForm: $openAddNewOutfitForm,
+            outfit: $newOutfit,
+            navigateOutfitView: $navigateOutfitView
+          )
+        }
+      }
+      .navigationDestination(isPresented: $navigateOutfitView) {
+        OutfitView(outfit: $newOutfit)
       }
     }
   }

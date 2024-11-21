@@ -43,7 +43,7 @@ struct ItemToolbar: View {
         RoundedRectangle(cornerRadius: 15)
           .fill(Color("MintGreen"))
           .frame(
-            width: .infinity,
+//            maxWidth: .infinity,
             height: isExpanded ? 500 : 150
           )
           .animation(.easeInOut, value: isExpanded)
