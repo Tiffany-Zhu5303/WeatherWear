@@ -34,7 +34,7 @@ struct AppLoadingView: View {
           return newCategory
         }()
         
-        let newItem = Item(dateAdded: defaultItem.dateAdded, image: defaultItem.image, category: category)
+        let newItem = Item(dateAdded: defaultItem.dateAdded, image: defaultItem.image, itemType: defaultItem.itemType, category: category)
         
         modelContext.insert(newItem)
         print("Inserted Item: \(newItem.id) and \(defaultItem.category.name)")

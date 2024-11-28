@@ -13,7 +13,7 @@ struct WeatherWearApp: App {
   var body: some Scene {
     WindowGroup {
       AppLoadingView()
-        .modelContainer(for: [Item.self, ItemCategory.self], inMemory: false)
+        .modelContainer(for: [Item.self, ItemCategory.self, Outfit.self, Favorite.self], inMemory: false)
     }
   }
 }

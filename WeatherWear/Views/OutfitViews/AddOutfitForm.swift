@@ -9,18 +9,49 @@ import SwiftUI
 import SwiftData
 
 struct OutfitFormInput: View {
+  @Environment(\.modelContext) private var modelContext
+  @State private var showAlert: Bool = false
+  @ObservedObject var outfitViewModel: OutfitViewModel
+  @Binding var newOutfitId: UUID?
   @Binding var navigateOutfitView: Bool
   @Binding var showForm: Bool
-  @Binding var outfit: Outfit
   
-  func updateOutfit() {
+  private func saveOutfit() {
+      do {
+          try modelContext.save()
+          print("Outfit successfully saved!")
+      } catch {
+          print("Failed to save outfit: \(error)")
+      }
+  }
+  
+  private func addOutfit() {
+    guard !outfitViewModel.outfit.name.isEmpty
+    else {
+        showAlert = true
+        return
+    }
     
+    let outfitName = outfitViewModel.outfit.name.isEmpty ? "\(Date().formatted(date: .abbreviated, time: .shortened)) Outfit": outfitViewModel.outfit.name
+    let newOutfit = Outfit(name: outfitName)
+    
+    modelContext.insert(newOutfit)
+    
+    outfitViewModel.outfit = newOutfit
+    newOutfitId = newOutfit.id
+    
+    print("inserted \(newOutfit.id) == \(outfitViewModel.outfit.id)")
+    saveOutfit()
+    
+    DispatchQueue.main.async {
+        self.outfitViewModel.objectWillChange.send() // Notify SwiftUI to refresh
+    }
   }
   
   var body: some View {
     VStack {
       HStack {
-        TextField("", text: $outfit.name, prompt: Text("Outfit Name"))
+        TextField("", text: $outfitViewModel.outfit.name, prompt: Text("Outfit Name"))
           .font(.caption)
           .padding(.leading, 10)
           .padding(.horizontal)
@@ -42,6 +73,7 @@ struct OutfitFormInput: View {
         VStack {
           Button("Create Outfit"){
             showForm = false
+            addOutfit()
             
             DispatchQueue.main.async {
               navigateOutfitView = true
@@ -53,19 +85,24 @@ struct OutfitFormInput: View {
               .stroke(Color("Moonstone"), lineWidth: 2)
           )
           .navigationDestination(isPresented: $navigateOutfitView) {
-            OutfitView(outfit: $outfit)
+            OutfitView(outfitView: outfitViewModel)
           }
         }
       }
+    }
+    .alert("Incomplete Form", isPresented: $showAlert) {
+      Button("Ok", role: .cancel) {}
+    } message: {
+      Text("Please set a non empty name for your outfit")
     }
   }
 }
 
 struct AddOutfitForm: View {
-  @Environment(\.modelContext) private var modelContext
+  @ObservedObject var outfitViewModel: OutfitViewModel
   @Binding var showForm: Bool
   @Binding var showOutfitForm: Bool
-  @Binding var outfit: Outfit
+  @Binding var newOutfitId: UUID?
   @Binding var navigateOutfitView: Bool
   
   var body: some View {
@@ -79,7 +116,12 @@ struct AddOutfitForm: View {
           width: 350,
           height: 220)
       VStack(alignment: .center) {
-        OutfitFormInput(navigateOutfitView: $navigateOutfitView, showForm: $showOutfitForm, outfit: $outfit)
+        OutfitFormInput(
+          outfitViewModel: outfitViewModel,
+          newOutfitId: $newOutfitId,
+          navigateOutfitView: $navigateOutfitView,
+          showForm: $showOutfitForm
+        )
           .font(.title2)
           .fontWeight(.bold)
           .foregroundStyle(Color("Moonstone"))
@@ -96,11 +138,10 @@ struct AddOutfitForm: View {
 
 #Preview {
   AddOutfitForm(
+    outfitViewModel: OutfitViewModel(outfit: Outfit()),
     showForm: .constant(true),
     showOutfitForm: .constant(true),
-    outfit: .constant(
-      Outfit(name: "\(Date().formatted(date: .abbreviated, time: .shortened)) Outfit")
-    ),
+    newOutfitId: .constant(nil),
     navigateOutfitView: .constant(false)
   )
 }

@@ -58,9 +58,21 @@ struct AddImagePopup: View {
         }
         HStack {
           Button("Paste") {
-            if let image = UIPasteboard.general.image,
-               let data = image.jpegData(compressionQuality: 1.0) {
-              imageData = data
+            let pasteboard = UIPasteboard.general
+            if pasteboard.hasImages {
+                print("Pasteboard has images.")
+                if let image = pasteboard.image {
+                    print("Image found: \(image.size)")
+                    if let data = image.jpegData(compressionQuality: 1.0) {
+                        imageData = data
+                        showPopup = false
+                        print("Image pasted successfully.")
+                    }
+                } else {
+                    print("Failed to retrieve image from pasteboard.")
+                }
+            } else {
+                print("Pasteboard does not have any images.")
             }
           }
           Spacer()

@@ -12,24 +12,35 @@ struct AddItemForm: View {
   @Environment(\.modelContext) private var modelContext
   @Query var categories: [ItemCategory]
   @State private var showAlert: Bool = false
-  @State private var selectedType: ItemCategory? = nil
+  @State private var selectedSubType: ItemCategory? = nil
+  @State private var selectedType: String? = nil
   @State private var imageData: Data? = nil
   @State private var openImagePopup: Bool = false
   @Binding var showForm: Bool
   
   var defaultOptions = ["Shirt", "Pants", "Shoes"]
+  var itemTypes = ["Tops", "Bottoms", "Shoes", "Accessories"]
   
   func addItem() {
-    guard let selectedType = selectedType,
+    guard let selectedSubType = selectedSubType,
+          let selectedType = selectedType,
           let selectedImage = imageData
     else {
       showAlert = true
       return
     }
     
-    let newItem = Item(image: selectedImage, category: selectedType)
+    let newItem = Item(image: selectedImage, itemType: selectedType, category: selectedSubType)
     modelContext.insert(newItem)
     print("Inserted new item: \(newItem.id) with category: \(newItem.category.name)")
+    
+    do {
+      try modelContext.save()
+      showForm = false
+      print("new item successfully added!")
+    } catch {
+      print("Failed to add new item: \(error)")
+    }
   }
   
   var body: some View {
@@ -47,6 +58,21 @@ struct AddItemForm: View {
               .foregroundStyle(Color("Moonstone"))
             Picker("Category: ", selection: $selectedType) {
               Text("Choose a category")
+                .tag(nil as String?)
+                .foregroundColor(Color("Moonstone"))
+              ForEach(itemTypes, id:\.self) { type in
+                Text(type)
+                  .tag(Optional(type))
+                  .foregroundStyle(Color("Moonstone"))
+              }
+            }
+          }
+          HStack {
+            Text("Item Type: ")
+              .font(.title3)
+              .foregroundStyle(Color("Moonstone"))
+            Picker("Sub-categories: ", selection: $selectedSubType) {
+              Text("Choose a type")
                 .tag(nil as ItemCategory?)
                 .foregroundColor(Color("Moonstone"))
               if(categories.isEmpty){
@@ -79,58 +105,56 @@ struct AddItemForm: View {
             }else {
               Image(systemName: "plus.circle.fill")
                 .foregroundStyle(Color("Moonstone"))
+            }
+          }
+          .contentShape(Rectangle())
+          .onChange(of: imageData) { newValue, _ in
+            if let newValue = newValue {
+              print("Image data updated in AddItemForm, size: \(newValue.count) bytes")
+            } else {
+              print("Image data is nil in AddItemForm")
+            }
+          }
+          .onTapGesture {
+            openImagePopup = true
           }
         }
-        .contentShape(Rectangle())
-        .onChange(of: imageData) { newValue, _ in
-            if let newValue = newValue {
-                print("Image data updated in AddItemForm, size: \(newValue.count) bytes")
-            } else {
-                print("Image data is nil in AddItemForm")
-            }
+        Button("Add item") {
+          addItem()
         }
-        .onTapGesture {
-          openImagePopup = true
+        .padding(.top, 20)
+      }
+      .background(
+        RoundedRectangle(cornerRadius: 15)
+          .foregroundStyle(Color.white)
+          .shadow(
+            color: Color.black.opacity(0.2),
+            radius: 5, x: 0.0, y: 0.0)
+          .frame(
+            width: 350,
+            height: 550)
+      )
+      if(openImagePopup) {
+        Color.gray.opacity(0.1)
+          .edgesIgnoringSafeArea(.all)
+          .blur(radius: 10)
+          .onTapGesture {
+            openImagePopup = false
+          }
+        VStack {
+          Spacer()
+          AddImagePopup(imageData: $imageData, showPopup: $openImagePopup)
+            .transition(.move(edge: .bottom))
         }
+        .zIndex(1)
       }
-      .padding(.top, 20)
-      Button("Add item") {
-        addItem()
-        showForm = false
-      }
-      .padding(.top, 20)
     }
-    .background(
-      RoundedRectangle(cornerRadius: 15)
-        .foregroundStyle(Color.white)
-        .shadow(
-          color: Color.black.opacity(0.2),
-          radius: 5, x: 0.0, y: 0.0)
-        .frame(
-          width: 350,
-          height: 550)
-    )
-    if(openImagePopup) {
-      Color.gray.opacity(0.1)
-        .edgesIgnoringSafeArea(.all)
-        .blur(radius: 10)
-        .onTapGesture {
-          openImagePopup = false
-        }
-      VStack {
-        Spacer()
-        AddImagePopup(imageData: $imageData, showPopup: $openImagePopup)
-          .transition(.move(edge: .bottom))
-      }
-      .zIndex(1)
-    }
-  }
     .alert("Incomplete Form", isPresented: $showAlert) {
       Button("Ok", role: .cancel) {}
     } message: {
       Text("Please select a category and image before adding the item.")
     }
-}
+  }
 }
 
 struct AddItemForm_Previews: PreviewProvider {

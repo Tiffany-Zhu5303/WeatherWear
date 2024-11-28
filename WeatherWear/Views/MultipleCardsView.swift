@@ -9,25 +9,20 @@ import SwiftUI
 import SwiftData
 
 struct MultipleCardsView: View {
+  @Environment(\.modelContext) var modelContext
+  @StateObject var outfitViewModel: OutfitViewModel = OutfitViewModel(outfit: Outfit())
   @State private var categoryState = CategoryState.outfits
   @State private var openAddNewItemForm: Bool = false
   @State private var openAddNewOutfitForm: Bool = false
   @State private var openItemFullscreen: Bool = false
-  @State private var newOutfit: Outfit = Outfit(name: "\(Date().formatted(date: .abbreviated, time: .shortened))'s outfit")
+  @State private var newOutfitId: UUID?
   @State private var selectedItem: Item? = nil
   @State private var selectedOutfit: Outfit? = nil
   @State private var selectedFavorite: Favorite? = nil
   @State private var navigateOutfitView: Bool = false
-  @Environment(\.modelContext) var modelContext
   @Query var items: [Item]
   @Query var outfits: [Outfit]
   @Query var favorites: [Favorite]
-  
-  enum ModelType {
-    case outfits
-    case items
-    case favorites
-  }
   
   var columns: [GridItem] {
     [
@@ -91,7 +86,9 @@ struct MultipleCardsView: View {
             }
           )
           .onTapGesture {
-            selectedItem = items[index]
+            DispatchQueue.main.async {
+              selectedItem = items[index]
+            }
           }
       }
     }
@@ -121,7 +118,7 @@ struct MultipleCardsView: View {
             }
           )
           .onTapGesture {
-            selectedItem = items[index]
+            selectedOutfit = outfits[index]
           }
       }
     }
@@ -151,7 +148,7 @@ struct MultipleCardsView: View {
             }
           )
           .onTapGesture {
-            selectedItem = items[index]
+            selectedFavorite = favorites[index]
           }
       }
     }
@@ -182,22 +179,20 @@ struct MultipleCardsView: View {
     NavigationStack {
       ZStack {
         VStack{
+          WeatherTopBarView()
           CategorySelector(categoryState: $categoryState)
-            .padding(.top)
+            .padding(.vertical)
           Spacer()
           Group {
             itemList
           }
         }
-        .onChange(of: selectedItem) { item, _ in
-          if item != nil {
-            openItemFullscreen = true
-          }
-        }
-        .fullScreenCover(isPresented: $openItemFullscreen) {
+        .fullScreenCover(isPresented: Binding(
+          get: { selectedItem != nil },
+          set: { if !$0 { selectedItem = nil } }
+        )) {
           if selectedItem != nil {
             ItemView(item: $selectedItem)
-              .zIndex(1)
           }
         }
         if(openAddNewItemForm) {
@@ -217,15 +212,16 @@ struct MultipleCardsView: View {
               openAddNewOutfitForm = false
             }
           AddOutfitForm(
+            outfitViewModel: outfitViewModel,
             showForm: $openAddNewOutfitForm,
             showOutfitForm: $openAddNewOutfitForm,
-            outfit: $newOutfit,
+            newOutfitId: $newOutfitId,
             navigateOutfitView: $navigateOutfitView
           )
         }
       }
       .navigationDestination(isPresented: $navigateOutfitView) {
-        OutfitView(outfit: $newOutfit)
+        OutfitView(outfitView: outfitViewModel)
       }
     }
   }

@@ -14,11 +14,13 @@ class Item: Identifiable {
   @Attribute var id: UUID = UUID()
   @Attribute var dateAdded: Date
   @Attribute var image: Data
+  @Attribute var itemType: String
   @Relationship var category: ItemCategory
 
-  init(dateAdded: Date = .now, image: Data? = nil, category: ItemCategory = ItemCategory(name: "Default")) {
+  init(dateAdded: Date = .now, image: Data? = nil, itemType: String = "", category: ItemCategory = ItemCategory(name: "Default")) {
     self.dateAdded = dateAdded
     self.image = image ?? UIImage(systemName: "hanger")?.pngData() ?? UIImage(named:"error-image")!.pngData()!
+    self.itemType = itemType
     self.category = category
   }
 }
