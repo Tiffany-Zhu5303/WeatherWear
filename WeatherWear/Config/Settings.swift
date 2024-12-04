@@ -12,7 +12,7 @@ enum Settings {
   static let cardSize = CGSize(width: 1300, height: 2000)
   static let thumbnailSize = CGSize(width: 150, height: 250)
   static let thumbnailImageSize = CGSize(width: 75, height: 150)
-  static let defaultElementSize = CGSize(width: 250, height: 180)
+  static let defaultElementSize = CGSize(width: 150, height: 250)
   static let borderColor: Color = Color("PaynesGray")
   static let borderWidth: CGFloat = 5
 }

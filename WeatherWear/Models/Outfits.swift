@@ -35,7 +35,7 @@ class Outfit: Identifiable {
   
   // Helper method to update the transform for an item in the outfit
   func updateTransform(for itemID: UUID, newTransform: Transform) {
-    transforms[itemID] = newTransform
+    self.transforms[itemID] = newTransform
   }
 }
 
@@ -47,6 +47,11 @@ class OutfitViewModel: ObservableObject {
   }
   
   func addItemToOutfit(_ item: Item) {
-    outfit.items.append(item)
+    self.outfit.items.append(item)
+    self.outfit.transforms[item.id] = Transform()
+  }
+  
+  func removeItemFromOutfit(_ item: Item) {
+    self.outfit.items.removeAll(where: { $0.id == item.id })
   }
 }

@@ -76,6 +76,25 @@ struct ToolbarItems: View {
     saveOutfit()
   }
   
+  private func removeItemFromOutfit(_ item: Item) {
+    selectedItems[item.category] = nil
+    outfitView.removeItemFromOutfit(item)
+    saveOutfit()
+  }
+  
+  private func handleItemSelection(_ item: Item) {
+    if selectedItems[item.category] == item {
+      removeItemFromOutfit(item)
+    } else {
+      if selectedItems[item.category] != nil {
+        let oldItem = selectedItems[item.category]!
+        removeItemFromOutfit(oldItem)
+      }
+      
+      addItemToOutfit(item)
+    }
+  }
+  
   var body: some View {
     if(!sectionItems.isEmpty) {
       ScrollView(showsIndicators: false) {
@@ -83,31 +102,23 @@ struct ToolbarItems: View {
           Group {
             ForEach(sectionItems.indices, id: \.self) { index in
               if let uiImage = UIImage(data: sectionItems[index].image) {
+                let item = sectionItems[index]
                 Image(uiImage: uiImage)
                   .resizable()
                   .scaledToFit()
                   .clipped()
-              }
-            }
-          }
-        }
-      }
-      .frame(
-        height: 400
-      )
-      .padding(.horizontal)
-    }else {
-      ScrollView(showsIndicators: false) {
-        LazyVGrid(columns: columns, spacing: 20) {
-          Group {
-            ForEach(testingItems.indices, id: \.self) { index in
-              if let uiImage = UIImage(data: testingItems[index].image) {
-                Image(uiImage: uiImage)
-                  .resizable()
-                  .scaledToFit()
-                  .clipped()
+                  .frame(
+                    width: 70,
+                    height: 70
+                  )
+                  .padding(5)
+                  .overlay(
+                    RoundedRectangle(cornerRadius: 10)
+                      .stroke(Color("Moonstone"), lineWidth: 1)
+                      .opacity(selectedItems[item.category] == item ? 1 : 0)
+                  )
                   .onTapGesture {
-                    addItemToOutfit(testingItems[index])
+                    handleItemSelection(item)
                   }
               }
             }
@@ -118,13 +129,14 @@ struct ToolbarItems: View {
         height: 400
       )
       .padding(.horizontal)
-//      Text("No items.")
-//        .fontWeight(.bold)
-//        .frame(
-//          width: 400,
-//          alignment: .center
-//        )
-//        .padding(.vertical)
+    }else {
+      Text("No items.")
+        .fontWeight(.bold)
+        .frame(
+          width: 400,
+          alignment: .center
+        )
+        .padding(.vertical)
     }
   }
 }
@@ -179,6 +191,7 @@ struct ItemToolbar: View {
             currentItems: $modal,
             selectedItems: $selectedItems)
             .padding(.top, 100)
+            .padding(.horizontal, 10)
         }
       }
       .ignoresSafeArea()
@@ -192,10 +205,7 @@ struct ItemToolbar: View {
   ItemToolbar(
     outfitView: OutfitViewModel(outfit: Outfit()),
     modal: .constant(.tops),
-    selectedItems: .constant([
-      ItemCategory(name: "Shirt"): initialItems[0],
-      ItemCategory(name: "Skirt"): initialItems[1],
-    ])
+    selectedItems: .constant([:])
   )
     .padding()
 }

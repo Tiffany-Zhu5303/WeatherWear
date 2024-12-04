@@ -16,7 +16,6 @@ enum CategoryState: Int, CaseIterable {
 
 struct CategorySelector: View {
   @Binding var categoryState: CategoryState
-  @Environment(\.modelContext) var modelContext
   
   func iconName(for category: CategoryState) -> String {
     switch category {

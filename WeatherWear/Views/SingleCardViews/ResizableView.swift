@@ -13,6 +13,8 @@ struct ResizableView: ViewModifier {
   @State private var previousRotation: Angle = .zero
   @State private var scale: CGFloat = 1.0
   
+  let minSize: CGSize = CGSize(width: 50, height: 50)
+  
   var dragGesture: some Gesture {
     DragGesture()
       .onChanged { value in
@@ -30,6 +32,9 @@ struct ResizableView: ViewModifier {
         previousRotation = rotation
       }
       .onEnded { _ in
+        if transform.rotation.degrees.isNaN {
+          transform.rotation = .zero
+        }
         previousRotation = .zero
       }
   }
@@ -40,8 +45,9 @@ struct ResizableView: ViewModifier {
         self.scale = scale
       }
       .onEnded { scale in
-        transform.size.width *= scale
-        transform.size.height *= scale
+        let newWidth = max(transform.size.width*scale, minSize.width)
+        let newHeight = max(transform.size.height*scale, minSize.height)
+        transform.size = CGSize(width: newWidth, height: newHeight)
         self.scale = 1.0
       }
   }
@@ -66,20 +72,19 @@ struct ResizableView: ViewModifier {
 extension View {
   func resizableView(transform: Binding<Transform>) -> some View {
     modifier(ResizableView(transform: transform))
+    }
   }
-}
 
-//struct Item_Previews: PreviewProvider {
-//  struct ItemPreview: View {
-//    @EnvironmentObject var store: CardStore
-//    
-//    var body: some View {
-//      CardElementView(element: initialElements[0])
-//        .resizableView(transform: $store.itemsCards[0].elements[0].transform)
-//    }
-//  }
-//  static var previews: some View {
-//    ItemPreview()
-//      .environmentObject(CardStore(defaultData: true))
-//  }
-//}
+  struct ResizableView_Previews: PreviewProvider {
+    static var previews: some View {
+      RoundedRectangle(cornerRadius: 30.0)
+        .foregroundColor(Color.blue)
+        .resizableView()
+    }
+  }
+
+  extension View {
+    func resizableView() -> some View {
+      modifier(ResizableView(transform: .constant(Transform())))
+    }
+}

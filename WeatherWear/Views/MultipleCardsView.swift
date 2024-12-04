@@ -62,7 +62,7 @@ struct MultipleCardsView: View {
   }
   
   var displayItems: some View {
-    ForEach(items.indices, id: \.self) { index in
+    ForEach(items) { item in
       VStack(alignment: .leading) {
         CardThumbnailView()
           .frame(
@@ -71,7 +71,7 @@ struct MultipleCardsView: View {
           )
           .overlay(
             Group {
-              if let uiImage = UIImage(data: items[index].image) {
+              if let uiImage = UIImage(data: item.image) {
                 Image(uiImage: uiImage)
                   .resizable()
                   .scaledToFit()
@@ -87,7 +87,7 @@ struct MultipleCardsView: View {
           )
           .onTapGesture {
             DispatchQueue.main.async {
-              selectedItem = items[index]
+              selectedItem = item
             }
           }
       }
@@ -95,7 +95,7 @@ struct MultipleCardsView: View {
   }
   
   var displayOutfits: some View {
-    ForEach(outfits.indices, id: \.self) { index in
+    ForEach(outfits) { outfit in
       VStack(alignment: .leading) {
         CardThumbnailView()
           .frame(
@@ -104,28 +104,29 @@ struct MultipleCardsView: View {
           )
           .overlay(
             Group {
-              //              if let uiImage = UIImage(data: outfits[index].image) {
-              //                Image(uiImage: uiImage)
-              //                  .resizable()
-              //                  .scaledToFill()
-              //                  .frame(
-              //                    width: Settings.thumbnailImageSize.width,
-              //                    height: Settings.thumbnailImageSize.height)
-              //              } else {
-              Text("No Image")
-                .foregroundColor(.gray)
-              //              }
+              if let thumbnailData = outfit.thumbnail,
+                 let uiImage = UIImage(data: thumbnailData) {
+                Image(uiImage: uiImage)
+                  .resizable()
+                  .scaledToFill()
+                  .frame(
+                    width: Settings.thumbnailImageSize.width,
+                    height: Settings.thumbnailImageSize.height)
+              } else {
+                Text("No Image")
+                  .foregroundColor(.gray)
+              }
             }
           )
           .onTapGesture {
-            selectedOutfit = outfits[index]
+            selectedOutfit = outfit
           }
       }
     }
   }
   
   var displayFavorites: some View {
-    ForEach(favorites.indices, id: \.self) { index in
+    ForEach(favorites) { favorite in
       VStack(alignment: .leading) {
         CardThumbnailView()
           .frame(
@@ -148,7 +149,7 @@ struct MultipleCardsView: View {
             }
           )
           .onTapGesture {
-            selectedFavorite = favorites[index]
+            selectedFavorite = favorite
           }
       }
     }
@@ -172,6 +173,10 @@ struct MultipleCardsView: View {
         }
       }
       .padding(.top)
+      .onChange(of: categoryState) {
+        print("Current Category: \(categoryState)")
+        print("Items: \(items.count), Outfits: \(outfits.count), Favorites: \(favorites.count)")
+      }
     }
   }
   
@@ -193,6 +198,14 @@ struct MultipleCardsView: View {
         )) {
           if selectedItem != nil {
             ItemView(item: $selectedItem)
+          }
+        }
+        .fullScreenCover(isPresented: Binding(
+          get: { selectedOutfit != nil },
+          set: { if !$0 { selectedOutfit = nil } }
+        )) {
+          if selectedOutfit != nil {
+            OutfitView(outfitView: OutfitViewModel(outfit: selectedOutfit!))
           }
         }
         if(openAddNewItemForm) {
