@@ -10,6 +10,7 @@ import SwiftUI
 struct OutfitItemsView: View {
   @Environment(\.modelContext) var modelContext
   @ObservedObject var outfitView: OutfitViewModel
+  @State private var capturedThumbnail: Bool = false
   @Binding var selectedItems: [ItemCategory: Item]
   
   var body: some View {
@@ -31,6 +32,12 @@ struct OutfitItemsView: View {
               selectedItems[item.category] = item
               print("selectedItems: \(String(describing: outfitView.outfit.transforms[item.id]?.size))")
             }
+            .onDisappear{
+              if !capturedThumbnail {
+                captureOutfitThumbnail()
+                capturedThumbnail = true
+              }
+            }
         }
       }
     }
@@ -39,4 +46,39 @@ struct OutfitItemsView: View {
 
 #Preview {
   OutfitItemsView(outfitView: OutfitViewModel(outfit: Outfit(items: initialItems)), selectedItems: .constant([:]))
+}
+
+extension OutfitItemsView {
+  /// Captures the thumbnail of the outfit items view
+  /// - Returns: Optional UIImage of the entire OutfitItemsView
+  private func captureOutfitThumbnail() {
+    // Create a UIHostingController to render the OutfitItemsView in isolation
+    let hostingController = UIHostingController(rootView: self)
+
+    // You can get the size of the view from its parent container (or dynamically set it)
+    let size = CGSize(width: UIScreen.main.bounds.width, height: 800) // Adjust this as necessary
+    
+    hostingController.view.frame = CGRect(origin: .zero, size: size)
+    
+    // Ensure the view is laid out before capturing the screenshot
+    DispatchQueue.main.async {
+      // Ensure the layout is complete before capturing
+      let renderer = UIGraphicsImageRenderer(size: hostingController.view.bounds.size)
+      let capturedImage = renderer.image { _ in
+        hostingController.view.drawHierarchy(in: hostingController.view.bounds, afterScreenUpdates: true)
+      }
+      
+      // Save the captured thumbnail image
+      saveOutfitThumbnail(capturedImage)
+    }
+  }
+  
+  /// Saves the captured thumbnail image to a file or model
+  /// - Parameter image: Captured UIImage of the outfit
+  func saveOutfitThumbnail(_ image: UIImage) {
+    let imagePath = image.save(to: "outfit-\(outfitView.outfit.id)-thumbnail.png")
+    let imageData = image.jpegData(compressionQuality: 1.0)
+    outfitView.outfit.thumbnail = imageData!
+    print("Thumbnail saved at path: \(imagePath)")
+  }
 }

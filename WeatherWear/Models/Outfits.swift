@@ -15,7 +15,7 @@ class Outfit: Identifiable {
   @Attribute var name: String
   @Attribute var dateAdded: Date
   @Attribute var transforms: [UUID: Transform] = [:]
-  @Attribute var thumbnail: Data?
+  @Attribute var thumbnail: Data
   @Relationship var items: [Item]
   
   init(
@@ -27,7 +27,7 @@ class Outfit: Identifiable {
     self.name = name
     self.dateAdded = dateAdded
     self.items = items
-    self.thumbnail = thumbnail
+    self.thumbnail = thumbnail ?? UIImage(named:"error-image")!.pngData()!
     self.transforms = items.reduce(into: [:]) { result, item in
       result[item.id] = Transform()
     }

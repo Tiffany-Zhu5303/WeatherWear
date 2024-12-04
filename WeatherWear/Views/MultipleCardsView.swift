@@ -104,8 +104,7 @@ struct MultipleCardsView: View {
           )
           .overlay(
             Group {
-              if let thumbnailData = outfit.thumbnail,
-                 let uiImage = UIImage(data: thumbnailData) {
+              if let uiImage = UIImage(data: outfit.thumbnail) {
                 Image(uiImage: uiImage)
                   .resizable()
                   .scaledToFill()

@@ -46,7 +46,6 @@ struct OutfitView: View {
                 ToolbarItem(placement: .navigationBarTrailing) {
                   Button("Done") {
                     saveOutfit()
-                    saveOutfitThumbnail(outfitId: outfitView.outfit.id)
                     dismiss()
                   }
                 }
@@ -63,36 +62,6 @@ struct OutfitView: View {
     }
   }
 }
-
-extension OutfitView {
-  /// captures outfit thumbnail in OutfitView
-  /// - Returns: UIImage of the thumbnail
-  func captureOutfitThumbnail() -> UIImage? {
-    // Create a UIHostingController with OutfitItemsView
-    let hostingController = UIHostingController(rootView: OutfitItemsView(outfitView: outfitView, selectedItems: $selectedItems))
-    
-    // Set the size of the view you want to capture
-    hostingController.view.bounds = CGRect(x: 0, y: 0, width: 300, height: 200) // Adjust size as needed
-    
-    // Begin capturing the view as an image
-    UIGraphicsBeginImageContextWithOptions(hostingController.view.bounds.size, false, 0)
-    hostingController.view.layer.render(in: UIGraphicsGetCurrentContext()!)
-    let capturedImage = UIGraphicsGetImageFromCurrentImageContext()
-    UIGraphicsEndImageContext()
-    
-    return capturedImage
-  }
-  
-  /// saves outfit thumbnail from item arrangement
-  /// - Parameter outfitId: the id of the outfit the thumbnail is saved for
-  func saveOutfitThumbnail(outfitId: UUID) {
-    if let image = captureOutfitThumbnail() {
-      let imagePath = image.save(to: "outfit\(outfitId)-thumbnail.png")
-      print("Thumbnail saved at path: \(imagePath)")
-    }
-  }
-}
-
 
 #Preview {
   OutfitView(outfitView: OutfitViewModel(outfit: Outfit(items:[Item(), Item(), Item()]))
