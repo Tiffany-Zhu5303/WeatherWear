@@ -10,8 +10,8 @@ import SwiftData
 
 struct MultipleCardsView: View {
   @Environment(\.modelContext) var modelContext
+  @AppStorage("categoryState") private var categoryStateRawValue: Int = CategoryState.outfits.rawValue
   @StateObject var outfitViewModel: OutfitViewModel = OutfitViewModel(outfit: Outfit())
-  @State private var categoryState = CategoryState.outfits
   @State private var openAddNewItemForm: Bool = false
   @State private var openAddNewOutfitForm: Bool = false
   @State private var openItemFullscreen: Bool = false
@@ -29,6 +29,24 @@ struct MultipleCardsView: View {
       GridItem(.adaptive(
         minimum: Settings.thumbnailSize.width))
     ]
+  }
+  
+  var categoryState: CategoryState {
+    get {
+        return CategoryState(rawValue: categoryStateRawValue) ?? .outfits
+    }
+    set {
+        categoryStateRawValue = newValue.rawValue
+    }
+  }
+  
+  var categoryStateBinding: Binding<CategoryState> {
+    Binding(
+        get: { self.categoryState },
+        set: { newValue in
+          self.categoryStateRawValue = newValue.rawValue
+        }
+    )
   }
   
   var addItemCard: some View {
@@ -184,7 +202,7 @@ struct MultipleCardsView: View {
       ZStack {
         VStack{
           WeatherTopBarView()
-          CategorySelector(categoryState: $categoryState)
+          CategorySelector(categoryState: categoryStateBinding)
             .padding(.vertical)
           Spacer()
           Group {

@@ -41,8 +41,8 @@ struct WeatherView: View {
           Text("--")
         }
         
-      } else if let error = locationManager.locationError {
-        Text("Error: \(error)")
+      } else if locationManager.locationError != nil {
+        Text("No location received")
       } else {
         Text("Fetching location...")
       }
@@ -53,10 +53,20 @@ struct WeatherView: View {
     .onDisappear {
       locationManager.stopFetchingLocation()
     }
-    .task {
+    .onChange(of: locationManager.userLatitude) {
       if let latitude = locationManager.userLatitude,
          let longitude = locationManager.userLongitude {
-        await fetchWeather(latitude: latitude, longitude: longitude)
+        Task {
+          await fetchWeather(latitude: latitude, longitude: longitude)
+        }
+      }
+    }
+    .onChange(of: locationManager.userLongitude) {
+      if let latitude = locationManager.userLatitude,
+         let longitude = locationManager.userLongitude {
+        Task {
+          await fetchWeather(latitude: latitude, longitude: longitude)
+        }
       }
     }
   }

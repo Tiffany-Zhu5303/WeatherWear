@@ -20,8 +20,6 @@ struct OutfitView: View {
     _selectedItems = State(initialValue: Dictionary(uniqueKeysWithValues: outfitView.outfit.items.compactMap { item in
       (item.category, item)
     }))
-    
-    print(selectedItems)
   }
   
   private func saveOutfit() {
