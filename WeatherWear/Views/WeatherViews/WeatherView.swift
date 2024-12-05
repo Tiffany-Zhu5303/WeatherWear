@@ -9,18 +9,38 @@ import SwiftUI
 
 struct WeatherView: View {
   @StateObject private var locationManager = LocationManager()
+  @State private var weatherData: WeatherObject?
+  @State private var weatherError: String?
   
+  func fetchWeather(latitude: Double, longitude: Double) async {
+    let weatherServer = WeatherService()
+    
+    do {
+      weatherData = try await weatherServer.getCurrentWeather(
+        latitude: "\(latitude)",
+        longitude: "\(longitude)"
+      )
+    } catch {
+      weatherError = error.localizedDescription
+    }
+  }
   
+  // Default simulator location: Apple Headquarter in CA
   var body: some View {
     VStack {
-      if let latitude = locationManager.userLatitude,
-         let longitude = locationManager.userLongitude {
-//        let weatherAPIURL = "https://api.openweathermap.org/data/2.5/weather?lat=\(latitude)&lon=\(longitude)&appid=YOUR_API_KEY"
-        Text("Your Coordinates:")
-        Text("Latitude: \(latitude)")
-        Text("Longitude: \(longitude)")
+      if locationManager.userLatitude != nil && locationManager.userLongitude != nil {
         
-        // Use these coordinates for your Weather API
+        if let weatherData = weatherData{
+          let temperature = Int(weatherData.current.temperature_2m)
+          let temperatureUnit = weatherData.current_units.temperature_2m
+          
+          Text("\(temperature) \(temperatureUnit)")
+        } else if let weatherError = weatherError {
+          Text("Error: \(weatherError)")
+        } else {
+          Text("--")
+        }
+        
       } else if let error = locationManager.locationError {
         Text("Error: \(error)")
       } else {
@@ -32,6 +52,12 @@ struct WeatherView: View {
     }
     .onDisappear {
       locationManager.stopFetchingLocation()
+    }
+    .task {
+      if let latitude = locationManager.userLatitude,
+         let longitude = locationManager.userLongitude {
+        await fetchWeather(latitude: latitude, longitude: longitude)
+      }
     }
   }
 }

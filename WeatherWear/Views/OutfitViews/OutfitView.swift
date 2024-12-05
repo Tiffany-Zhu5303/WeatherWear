@@ -15,6 +15,15 @@ struct OutfitView: View {
   @State private var currentModal: ItemSelection = .tops
   @State private var selectedItems: [ItemCategory: Item] = [:]
   
+  init(outfitView: OutfitViewModel) {
+    self.outfitView = outfitView
+    _selectedItems = State(initialValue: Dictionary(uniqueKeysWithValues: outfitView.outfit.items.compactMap { item in
+      (item.category, item)
+    }))
+    
+    print(selectedItems)
+  }
+  
   private func saveOutfit() {
     do {
       try modelContext.save()
@@ -25,8 +34,10 @@ struct OutfitView: View {
   }
   
   private func deleteOutfit() {
-    modelContext.delete(outfitView.outfit)
-    saveOutfit()
+    DispatchQueue.main.async {
+      modelContext.delete(outfitView.outfit)
+      saveOutfit()
+    }
   }
   
   var body: some View {

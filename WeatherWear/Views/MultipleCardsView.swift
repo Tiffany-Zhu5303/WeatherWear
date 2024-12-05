@@ -203,8 +203,8 @@ struct MultipleCardsView: View {
           get: { selectedOutfit != nil },
           set: { if !$0 { selectedOutfit = nil } }
         )) {
-          if selectedOutfit != nil {
-            OutfitView(outfitView: OutfitViewModel(outfit: selectedOutfit!))
+          if let selectedOutfit = selectedOutfit {
+            OutfitView(outfitView: OutfitViewModel(outfit: selectedOutfit))
           }
         }
         if(openAddNewItemForm) {

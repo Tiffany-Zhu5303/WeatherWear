@@ -20,6 +20,7 @@ struct WeatherTopBarView: View {
         Text("\(formattedCurrentDate)")
           .font(.title3)
         Text("New York")
+        WeatherView()
       }
       .fontWeight(.bold)
       Spacer()

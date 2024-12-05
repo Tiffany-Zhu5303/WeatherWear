@@ -37,7 +37,6 @@ struct ToolbarItems: View {
   @Query var items: [Item]
   @Environment(\.modelContext) var modelContext
   @ObservedObject var outfitView: OutfitViewModel
-  @State var testingItems: [Item] = initialItems
   @Binding var currentItems: ItemSelection
   @Binding var selectedItems: [ItemCategory:Item]
   
@@ -86,11 +85,9 @@ struct ToolbarItems: View {
     if selectedItems[item.category] == item {
       removeItemFromOutfit(item)
     } else {
-      if selectedItems[item.category] != nil {
-        let oldItem = selectedItems[item.category]!
+      if let oldItem = selectedItems[item.category]{
         removeItemFromOutfit(oldItem)
       }
-      
       addItemToOutfit(item)
     }
   }
