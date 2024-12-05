@@ -11,11 +11,10 @@ import SwiftData
 struct MultipleCardsView: View {
   @Environment(\.modelContext) var modelContext
   @AppStorage("categoryState") private var categoryStateRawValue: Int = CategoryState.outfits.rawValue
-  @StateObject var outfitViewModel: OutfitViewModel = OutfitViewModel(outfit: Outfit())
   @State private var openAddNewItemForm: Bool = false
   @State private var openAddNewOutfitForm: Bool = false
   @State private var openItemFullscreen: Bool = false
-  @State private var newOutfitId: UUID?
+  @State private var newOutfit: Outfit = Outfit()
   @State private var selectedItem: Item? = nil
   @State private var selectedOutfit: Outfit? = nil
   @State private var selectedFavorite: Favorite? = nil
@@ -33,19 +32,19 @@ struct MultipleCardsView: View {
   
   var categoryState: CategoryState {
     get {
-        return CategoryState(rawValue: categoryStateRawValue) ?? .outfits
+      return CategoryState(rawValue: categoryStateRawValue) ?? .outfits
     }
     set {
-        categoryStateRawValue = newValue.rawValue
+      categoryStateRawValue = newValue.rawValue
     }
   }
   
   var categoryStateBinding: Binding<CategoryState> {
     Binding(
-        get: { self.categoryState },
-        set: { newValue in
-          self.categoryStateRawValue = newValue.rawValue
-        }
+      get: { self.categoryState },
+      set: { newValue in
+        self.categoryStateRawValue = newValue.rawValue
+      }
     )
   }
   
@@ -222,7 +221,8 @@ struct MultipleCardsView: View {
           set: { if !$0 { selectedOutfit = nil } }
         )) {
           if let selectedOutfit = selectedOutfit {
-            OutfitView(outfitView: OutfitViewModel(outfit: selectedOutfit))
+            OutfitView(
+              outfit: Binding(get: { selectedOutfit }, set: { self.selectedOutfit = $0 }))
           }
         }
         if(openAddNewItemForm) {
@@ -242,16 +242,26 @@ struct MultipleCardsView: View {
               openAddNewOutfitForm = false
             }
           AddOutfitForm(
-            outfitViewModel: outfitViewModel,
+            outfit: Binding(get: {newOutfit}, set: {self.selectedOutfit = $0}),
             showForm: $openAddNewOutfitForm,
             showOutfitForm: $openAddNewOutfitForm,
-            newOutfitId: $newOutfitId,
             navigateOutfitView: $navigateOutfitView
           )
+          .onDisappear {
+            selectedOutfit = newOutfit
+          }
         }
       }
       .navigationDestination(isPresented: $navigateOutfitView) {
-        OutfitView(outfitView: outfitViewModel)
+        if let selectedOutfit = selectedOutfit {
+          OutfitView(
+            outfit: Binding(get: { selectedOutfit }, set: { self.selectedOutfit = $0 }))
+          .onDisappear{
+            navigateOutfitView = false
+          }
+        } else {
+          Text("No outfit selected")
+        }
       }
     }
   }

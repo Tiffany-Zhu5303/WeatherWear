@@ -11,16 +11,9 @@ import SwiftData
 struct OutfitView: View {
   @Environment(\.dismiss) var dismiss
   @Environment(\.modelContext) var modelContext
-  @ObservedObject var outfitView: OutfitViewModel
   @State private var currentModal: ItemSelection = .tops
   @State private var selectedItems: [ItemCategory: Item] = [:]
-  
-  init(outfitView: OutfitViewModel) {
-    self.outfitView = outfitView
-    _selectedItems = State(initialValue: Dictionary(uniqueKeysWithValues: outfitView.outfit.items.compactMap { item in
-      (item.category, item)
-    }))
-  }
+  @Binding var outfit: Outfit
   
   private func saveOutfit() {
     do {
@@ -33,7 +26,7 @@ struct OutfitView: View {
   
   private func deleteOutfit() {
     DispatchQueue.main.async {
-      modelContext.delete(outfitView.outfit)
+      modelContext.delete(outfit)
       saveOutfit()
     }
   }
@@ -43,7 +36,7 @@ struct OutfitView: View {
       NavigationStack {
         ZStack(alignment: .bottom) {
           VStack {
-            OutfitItemsView(outfitView: outfitView, selectedItems: $selectedItems)
+            OutfitItemsView(selectedItems: $selectedItems, outfit: $outfit)
               .toolbar {
                 ToolbarItem(placement: .navigationBarLeading) {
                   Button("Delete Outfit") {
@@ -61,18 +54,24 @@ struct OutfitView: View {
               }
           }
           ItemToolbar(
-            outfitView: outfitView,
+            outfit: $outfit,
             modal: $currentModal,
             selectedItems: $selectedItems)
           .ignoresSafeArea()
         }
         .navigationBarBackButtonHidden(true)
+        .onAppear{
+          selectedItems = Dictionary(uniqueKeysWithValues: outfit.items.compactMap { item in
+              (item.category, item)
+          })
+        }
       }
     }
   }
 }
 
 #Preview {
-  OutfitView(outfitView: OutfitViewModel(outfit: Outfit(items:[Item(), Item(), Item()]))
+  OutfitView(
+    outfit: .constant(Outfit(items: [Item()]))
   )
 }

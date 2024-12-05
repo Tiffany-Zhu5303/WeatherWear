@@ -36,7 +36,7 @@ struct ToolbarButton: View {
 struct ToolbarItems: View {
   @Query var items: [Item]
   @Environment(\.modelContext) var modelContext
-  @ObservedObject var outfitView: OutfitViewModel
+  @Binding var outfit: Outfit
   @Binding var currentItems: ItemSelection
   @Binding var selectedItems: [ItemCategory:Item]
   
@@ -71,13 +71,13 @@ struct ToolbarItems: View {
   
   private func addItemToOutfit(_ item: Item) {
     selectedItems[item.category] = item
-    outfitView.addItemToOutfit(item)
+    outfit.addItemToOutfit(item)
     saveOutfit()
   }
   
   private func removeItemFromOutfit(_ item: Item) {
     selectedItems[item.category] = nil
-    outfitView.removeItemFromOutfit(item)
+    outfit.removeItemFromOutfit(item)
     saveOutfit()
   }
   
@@ -139,8 +139,8 @@ struct ToolbarItems: View {
 }
 
 struct ItemToolbar: View {
-  @ObservedObject var outfitView: OutfitViewModel
   @State var isExpanded: Bool = false
+  @Binding var outfit: Outfit
   @Binding var modal: ItemSelection
   @Binding var selectedItems: [ItemCategory:Item]
   
@@ -184,7 +184,7 @@ struct ItemToolbar: View {
         .padding(.horizontal)
         if isExpanded {
           ToolbarItems(
-            outfitView: outfitView,
+            outfit: $outfit,
             currentItems: $modal,
             selectedItems: $selectedItems)
             .padding(.top, 100)
@@ -200,7 +200,7 @@ struct ItemToolbar: View {
 
 #Preview {
   ItemToolbar(
-    outfitView: OutfitViewModel(outfit: Outfit()),
+    outfit: .constant(Outfit(items: [Item()])),
     modal: .constant(.tops),
     selectedItems: .constant([:])
   )

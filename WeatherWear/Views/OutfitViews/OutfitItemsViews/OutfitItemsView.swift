@@ -9,15 +9,15 @@ import SwiftUI
 
 struct OutfitItemsView: View {
   @Environment(\.modelContext) var modelContext
-  @ObservedObject var outfitView: OutfitViewModel
   @State private var capturedThumbnail: Bool = false
   @State private var selectedItem: Item?
   @Binding var selectedItems: [ItemCategory: Item]
+  @Binding var outfit: Outfit
   
   var body: some View {
     ZStack {
       Color.white
-      ForEach(outfitView.outfit.items, id: \.id) { item in
+      ForEach(outfit.items, id: \.id) { item in
         if let uiImage = UIImage(data: item.image) {
           Image(uiImage: uiImage)
             .resizable()
@@ -25,9 +25,9 @@ struct OutfitItemsView: View {
             .resizableView(
               transform:
                 Binding(
-                  get: {outfitView.outfit.transforms[item.id] ?? Transform()},
+                  get: {outfit.transforms[item.id] ?? Transform()},
                   set: {newTransform in
-                    outfitView.outfit.updateTransform(for: item.id, newTransform: newTransform)})
+                    outfit.updateTransform(for: item.id, newTransform: newTransform)})
             )
             .zIndex(selectedItem?.id == item.id ? 10 : 1)
             .onTapGesture {
@@ -35,7 +35,7 @@ struct OutfitItemsView: View {
             }
             .onAppear{
               selectedItems[item.category] = item
-              print("selectedItems: \(String(describing: outfitView.outfit.transforms[item.id]?.size))")
+              print("selectedItems: \(String(describing: outfit.transforms[item.id]?.size))")
             }
             .onDisappear{
               if !capturedThumbnail {
@@ -50,7 +50,9 @@ struct OutfitItemsView: View {
 }
 
 #Preview {
-  OutfitItemsView(outfitView: OutfitViewModel(outfit: Outfit(items: initialItems)), selectedItems: .constant([:]))
+  OutfitItemsView(
+    selectedItems: .constant([:]),
+    outfit: .constant(Outfit(items: initialItems)))
 }
 
 extension OutfitItemsView {
@@ -81,11 +83,11 @@ extension OutfitItemsView {
   /// Saves the captured thumbnail image to a file or model
   /// - Parameter image: Captured UIImage of the outfit
   func saveOutfitThumbnail(_ image: UIImage) {
-    let imagePath = image.save(to: "outfit-\(outfitView.outfit.id)-thumbnail.png")
+    let imagePath = image.save(to: "outfit-\(outfit.id)-thumbnail.png")
     let imageData = image.jpegData(compressionQuality: 1.0)
     
     DispatchQueue.main.async {
-      outfitView.outfit.thumbnail = imageData!
+      outfit.thumbnail = imageData!
       print("Thumbnail saved at path: \(imagePath)")
     }
   }

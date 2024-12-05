@@ -37,21 +37,34 @@ class Outfit: Identifiable {
   func updateTransform(for itemID: UUID, newTransform: Transform) {
     self.transforms[itemID] = newTransform
   }
-}
-
-class OutfitViewModel: ObservableObject {
-  @Published var outfit: Outfit
-  
-  init(outfit: Outfit) {
-    self.outfit = outfit
-  }
   
   func addItemToOutfit(_ item: Item) {
-    self.outfit.items.append(item)
-    self.outfit.transforms[item.id] = Transform()
+    self.items.append(item)
+    self.transforms[item.id] = Transform()
   }
   
   func removeItemFromOutfit(_ item: Item) {
-    self.outfit.items.removeAll(where: { $0.id == item.id })
+    self.items.removeAll(where: { $0.id == item.id })
+  }
+}
+
+class ExistingOutfits: ObservableObject {
+  @Published var outfits: [Outfit] = []
+  
+  func addItemToOutfit(_ item: Item, outfitId: UUID) {
+    let outfit = self.outfits.firstIndex(where: {$0.id == outfitId})
+    if let outfit {
+      self.outfits[outfit].items.append(item)
+      self.outfits[outfit].transforms[item.id] = Transform()
+    } else {
+      print("Outfit not found")
+    }
+  }
+  
+  func removeItemFromOutfit(_ item: Item, outfitId: UUID) {
+    let outfit = self.outfits.firstIndex(where: {$0.id == outfitId})
+    if let outfit {
+      self.outfits[outfit].items.removeAll(where: { $0.id == item.id })
+    }
   }
 }

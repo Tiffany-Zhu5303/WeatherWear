@@ -11,8 +11,7 @@ import SwiftData
 struct OutfitFormInput: View {
   @Environment(\.modelContext) private var modelContext
   @State private var showAlert: Bool = false
-  @ObservedObject var outfitViewModel: OutfitViewModel
-  @Binding var newOutfitId: UUID?
+  @Binding var outfit: Outfit
   @Binding var navigateOutfitView: Bool
   @Binding var showForm: Bool
   
@@ -26,32 +25,30 @@ struct OutfitFormInput: View {
   }
   
   private func addOutfit() {
-    guard !outfitViewModel.outfit.name.isEmpty
+    guard !outfit.name.isEmpty
     else {
         showAlert = true
         return
     }
     
-    let outfitName = outfitViewModel.outfit.name.isEmpty ? "\(Date().formatted(date: .abbreviated, time: .shortened)) Outfit": outfitViewModel.outfit.name
-    let newOutfit = Outfit(name: outfitName)
+    let outfitName = outfit.name.isEmpty ? "\(Date().formatted(date: .abbreviated, time: .shortened)) Outfit": outfit.name
+    outfit.name = outfitName
     
-    modelContext.insert(newOutfit)
-    
-    outfitViewModel.outfit = newOutfit
-    newOutfitId = newOutfit.id
-    
-    print("inserted \(newOutfit.id) == \(outfitViewModel.outfit.id)")
+    modelContext.insert(outfit)
+
+    print("inserted\(outfit.id)")
     saveOutfit()
     
     DispatchQueue.main.async {
-        self.outfitViewModel.objectWillChange.send() // Notify SwiftUI to refresh
+        showForm = false
+        navigateOutfitView = true
     }
   }
   
   var body: some View {
     VStack {
       HStack {
-        TextField("", text: $outfitViewModel.outfit.name, prompt: Text("Outfit Name"))
+        TextField("", text: $outfit.name, prompt: Text("Outfit Name"))
           .font(.caption)
           .padding(.leading, 10)
           .padding(.horizontal)
@@ -72,12 +69,7 @@ struct OutfitFormInput: View {
       NavigationStack {
         VStack {
           Button("Create Outfit"){
-            showForm = false
             addOutfit()
-            
-            DispatchQueue.main.async {
-              navigateOutfitView = true
-            }
           }
           .padding(5)
           .background(
@@ -85,7 +77,7 @@ struct OutfitFormInput: View {
               .stroke(Color("Moonstone"), lineWidth: 2)
           )
           .navigationDestination(isPresented: $navigateOutfitView) {
-            OutfitView(outfitView: outfitViewModel)
+            OutfitView(outfit: $outfit)
           }
         }
       }
@@ -99,10 +91,9 @@ struct OutfitFormInput: View {
 }
 
 struct AddOutfitForm: View {
-  @ObservedObject var outfitViewModel: OutfitViewModel
+  @Binding var outfit: Outfit
   @Binding var showForm: Bool
   @Binding var showOutfitForm: Bool
-  @Binding var newOutfitId: UUID?
   @Binding var navigateOutfitView: Bool
   
   var body: some View {
@@ -117,8 +108,7 @@ struct AddOutfitForm: View {
           height: 220)
       VStack(alignment: .center) {
         OutfitFormInput(
-          outfitViewModel: outfitViewModel,
-          newOutfitId: $newOutfitId,
+          outfit: $outfit,
           navigateOutfitView: $navigateOutfitView,
           showForm: $showOutfitForm
         )
@@ -138,10 +128,9 @@ struct AddOutfitForm: View {
 
 #Preview {
   AddOutfitForm(
-    outfitViewModel: OutfitViewModel(outfit: Outfit()),
+    outfit: .constant(Outfit(items: [Item()])),
     showForm: .constant(true),
     showOutfitForm: .constant(true),
-    newOutfitId: .constant(nil),
     navigateOutfitView: .constant(false)
   )
 }
