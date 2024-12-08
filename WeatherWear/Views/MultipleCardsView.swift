@@ -25,6 +25,16 @@ struct MultipleCardsView: View {
   @Query(sort: [SortDescriptor(\Outfit.dateAdded, order: .forward)]) @MainActor var outfits: [Outfit]
   @Query @MainActor var favorites: [Favorite]
   
+  func addFavorite(favorite: Favorite) {
+    do {
+      modelContext.insert(favorite)
+      try modelContext.save()
+      print("Favorite saved!")
+    } catch {
+      print("Error saving favorite: \(error)")
+    }
+  }
+  
   var columns: [GridItem] {
     [
       GridItem(.adaptive(
@@ -109,6 +119,15 @@ struct MultipleCardsView: View {
               selectedItem = item
             }
           }
+          .contextMenu{
+            Button(action: {
+              let favorite = Favorite(item: item)
+              addFavorite(favorite: favorite)
+            }){
+              Text("Favorite")
+              Image(systemName: "heart")
+            }
+          }
       }
     }
   }
@@ -141,6 +160,13 @@ struct MultipleCardsView: View {
             navigateOutfitView = true
           }
           .contextMenu{
+            Button(action: {
+              let favorite = Favorite(outfit: outfit)
+              addFavorite(favorite: favorite)
+            }){
+              Text("Favorite")
+              Image(systemName: "heart")
+            }
             Button(role: .destructive, action: {
               outfit.deleteOutfit(modelContext: modelContext)
             }) {
@@ -195,7 +221,6 @@ struct MultipleCardsView: View {
             addItemCard
           case .favorites:
             displayFavorites
-            addItemCard
           }
         }
       }
@@ -216,6 +241,11 @@ struct MultipleCardsView: View {
             .padding(.vertical)
           Spacer()
           Group {
+            if favorites.isEmpty && categoryState == .favorites {
+              Text("No Favorites")
+                .foregroundStyle(Color("Moonstone"))
+                .padding(.top)
+            }
             itemList
           }
         }
