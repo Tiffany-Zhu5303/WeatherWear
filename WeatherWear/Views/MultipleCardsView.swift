@@ -21,9 +21,9 @@ struct MultipleCardsView: View {
   @State private var selectedFavorite: Favorite? = nil
   @State private var navigateOutfitView: Bool = false
   @State private var navigateWeatherDetailsView: Bool = false
-  @Query(sort: [SortDescriptor(\Item.dateAdded, order: .forward)]) var items: [Item]
-  @Query(sort: [SortDescriptor(\Outfit.dateAdded, order: .forward)])  var outfits: [Outfit]
-  @Query var favorites: [Favorite]
+  @Query(sort: [SortDescriptor(\Item.dateAdded, order: .forward)]) @MainActor var items: [Item]
+  @Query(sort: [SortDescriptor(\Outfit.dateAdded, order: .forward)]) @MainActor var outfits: [Outfit]
+  @Query @MainActor var favorites: [Favorite]
   
   var columns: [GridItem] {
     [
@@ -223,7 +223,11 @@ struct MultipleCardsView: View {
           print("Outfits:\(outfits.count), Items:\(items.count), Favorites:\(favorites.count)")
           if(outfits.count != 0) {
             for outfit in outfits {
-              print("\(outfit.items.count)")
+              if !outfit.items.isEmpty {
+                print("\(outfit.items.count)")
+              } else {
+                print("EMPTY")
+              }
             }
           }
         }
@@ -252,14 +256,12 @@ struct MultipleCardsView: View {
               openAddNewOutfitForm = false
             }
           AddOutfitForm(
-            outfit: Binding(get: {newOutfit}, set: {self.selectedOutfit = $0}),
+            outfit: Binding(get: {newOutfit}, set: {newOutfit = $0}),
+            selectedOutfit: $selectedOutfit,
             showForm: $openAddNewOutfitForm,
             showOutfitForm: $openAddNewOutfitForm,
             navigateOutfitView: $navigateOutfitView
           )
-          .onDisappear {
-            newOutfit = Outfit()
-          }
         }
       }
       .navigationDestination(isPresented: $navigateOutfitView) {

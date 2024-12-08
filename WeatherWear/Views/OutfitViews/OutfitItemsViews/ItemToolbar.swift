@@ -60,31 +60,33 @@ struct ToolbarItems: View {
     }
   }
   
-  private func saveOutfit() {
-    do {
-      try modelContext.save()
-      print("Items saved in this outfit from items toolbar")
-      for item in outfit.items {
-        print("\(item.itemType)")
-      }
-      print("Outfit successfully saved!")
-    } catch {
-      print("Failed to save outfit: \(error)")
-    }
-  }
+//  private func saveOutfit() {
+//    do {
+//      try modelContext.save()
+//      print("Items saved in this outfit from items toolbar")
+//      for item in outfit.items {
+//        print("\(item.itemType)")
+//      }
+//      print("Outfit successfully saved!")
+//    } catch {
+//      print("Failed to save outfit: \(error)")
+//    }
+//  }
   
   private func addItemToOutfit(_ item: Item) {
     selectedItems[item.category] = item
+    print("Before before: \(outfit.items)")
     outfit.addItemToOutfit(item)
+    print("After After: \(outfit.items)")
     print("Saving from add Item to outfit...")
-    saveOutfit()
+//    saveOutfit()
   }
   
   private func removeItemFromOutfit(_ item: Item) {
     selectedItems[item.category] = nil
     outfit.removeItemFromOutfit(item)
     print("Saving from removeItemFromOutfit...")
-    saveOutfit()
+//    saveOutfit()
   }
   
   private func handleItemSelection(_ item: Item) {

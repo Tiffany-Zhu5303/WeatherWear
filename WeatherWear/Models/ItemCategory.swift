@@ -11,7 +11,7 @@ import SwiftData
 @Model
 // Equatable to compare objects
 class ItemCategory: Identifiable, Equatable {
-  @Attribute var id: UUID = UUID()
+  @Attribute(.unique) var id: UUID = UUID()
   @Attribute var name: String
   @Relationship var items: [Item] = []
   

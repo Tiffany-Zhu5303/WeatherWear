@@ -11,7 +11,7 @@ import SwiftData
 
 @Model
 class Item: Identifiable {
-  @Attribute var id: UUID = UUID()
+  @Attribute(.unique) var id: UUID = UUID()
   @Attribute var dateAdded: Date
   @Attribute var image: Data
   @Attribute var itemType: String

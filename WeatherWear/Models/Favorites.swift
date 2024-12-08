@@ -10,7 +10,7 @@ import SwiftData
 
 @Model
 class Favorite: Identifiable {
-  @Attribute var id: UUID = UUID()
+  @Attribute(.unique) var id: UUID = UUID()
   @Relationship var item: Item?
   @Relationship var outfit: Outfit?
   

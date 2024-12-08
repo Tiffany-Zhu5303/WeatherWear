@@ -11,41 +11,23 @@ import SwiftData
 struct AppLoadingView: View {
   @State private var showLaunchScreen: Bool = true
   @Environment(\.modelContext) private var modelContext
-  @Query private var existingCategories: [ItemCategory]
-  @Query private var existingItems: [Item]
+  @Query @MainActor private var existingCategories: [ItemCategory]
   
   func addDefaultData() {
-    if(existingCategories.isEmpty){
-      let defaultItems = ["Shirt", "Pants", "Skirt", "Dress", "Shoes", "Bag"]
-      
-      for defaultItem in defaultItems {
-        let item = ItemCategory(name: defaultItem)
-        modelContext.insert(item)
-        print("Inserted category: \(defaultItem)")
-      }
-    }
+    guard existingCategories.isEmpty else { return }
+    let defaultItems = ["Shirt", "Pants", "Skirt", "Sneakers", "Bag"]
     
-    if(existingItems.isEmpty) {
-      for defaultItem in initialItems {
-        let categoryName = defaultItem.category.name
-        let category = modelContext.fetchCategory(named: categoryName) ?? {
-          let newCategory = ItemCategory(name: categoryName)
-          modelContext.insert(newCategory)
-          return newCategory
-        }()
-        
-        let newItem = Item(dateAdded: defaultItem.dateAdded, image: defaultItem.image, itemType: defaultItem.itemType, category: category)
-        
-        modelContext.insert(newItem)
-        print("Inserted Item: \(newItem.id) and \(defaultItem.category.name)")
-      }
+    for defaultItem in defaultItems {
+      let item = ItemCategory(name: defaultItem)
+      modelContext.insert(item)
+      print("Inserted category: \(defaultItem)")
     }
     
     do {
-        try modelContext.save()
-        print("Model context saved.")
+      try modelContext.save()
+      print("Model context saved.")
     } catch {
-        print("Failed to save model context: \(error)")
+      print("Failed to save model context: \(error)")
     }
   }
     

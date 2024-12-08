@@ -12,17 +12,18 @@ struct OutfitFormInput: View {
   @Environment(\.modelContext) private var modelContext
   @State private var showAlert: Bool = false
   @Binding var outfit: Outfit
+  @Binding var selectedOutfit: Outfit?
   @Binding var navigateOutfitView: Bool
   @Binding var showForm: Bool
   
-  private func saveOutfit() {
-      do {
-          try modelContext.save()
-          print("Outfit successfully saved!")
-      } catch {
-          print("Failed to save outfit: \(error)")
-      }
-  }
+//  private func saveOutfit() {
+//      do {
+//          try modelContext.save()
+//          print("Outfit successfully saved!")
+//      } catch {
+//          print("Failed to save outfit: \(error)")
+//      }
+//  }
   
   private func addOutfit() {
     guard !outfit.name.isEmpty
@@ -37,9 +38,11 @@ struct OutfitFormInput: View {
     modelContext.insert(outfit)
 
     print("inserted\(outfit.id)")
-    saveOutfit()
+//    saveOutfit()
     
     DispatchQueue.main.async {
+        selectedOutfit = outfit
+        outfit = Outfit()
         showForm = false
         navigateOutfitView = true
     }
@@ -92,6 +95,7 @@ struct OutfitFormInput: View {
 
 struct AddOutfitForm: View {
   @Binding var outfit: Outfit
+  @Binding var selectedOutfit: Outfit?
   @Binding var showForm: Bool
   @Binding var showOutfitForm: Bool
   @Binding var navigateOutfitView: Bool
@@ -109,6 +113,7 @@ struct AddOutfitForm: View {
       VStack(alignment: .center) {
         OutfitFormInput(
           outfit: $outfit,
+          selectedOutfit: $selectedOutfit,
           navigateOutfitView: $navigateOutfitView,
           showForm: $showOutfitForm
         )
@@ -132,6 +137,7 @@ struct AddOutfitForm: View {
 #Preview {
   AddOutfitForm(
     outfit: .constant(Outfit(items: [Item()])),
+    selectedOutfit: .constant(nil),
     showForm: .constant(true),
     showOutfitForm: .constant(true),
     navigateOutfitView: .constant(false)

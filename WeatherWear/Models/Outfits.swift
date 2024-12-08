@@ -11,7 +11,7 @@ import SwiftData
 
 @Model
 class Outfit: Identifiable {
-  @Attribute var id: UUID = UUID()
+  @Attribute(.unique) var id: UUID = UUID()
   @Attribute var name: String
   @Attribute var dateAdded: Date
   @Attribute var transforms: [UUID: Transform] = [:]
@@ -39,7 +39,9 @@ class Outfit: Identifiable {
   }
   
   func addItemToOutfit(_ item: Item) {
+    print("Before: \(self.items)")
     self.items.append(item)
+    print("After: \(self.items)")
     self.transforms[item.id] = Transform()
   }
   
