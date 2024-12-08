@@ -7,9 +7,9 @@
 
 import SwiftUI
 
-struct WeatherView: View {
+struct CurrentWeatherView: View {
   @StateObject private var locationManager = LocationManager()
-  @State private var weatherData: WeatherObject?
+  @State private var weatherData: CurrentWeatherObject?
   @State private var weatherError: String?
   
   func fetchWeather(latitude: Double, longitude: Double) async {
@@ -28,6 +28,9 @@ struct WeatherView: View {
   // Default simulator location: Apple Headquarter in CA
   var body: some View {
     VStack {
+      if locationManager.userCity != nil{
+        Text("\(locationManager.userCity!)")
+      }
       if locationManager.userLatitude != nil && locationManager.userLongitude != nil {
         
         if let weatherData = weatherData{
@@ -73,5 +76,5 @@ struct WeatherView: View {
 }
 
 #Preview {
-  WeatherView()
+  CurrentWeatherView()
 }

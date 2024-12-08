@@ -24,13 +24,6 @@ struct OutfitView: View {
     }
   }
   
-  private func deleteOutfit() {
-    DispatchQueue.main.async {
-      modelContext.delete(outfit)
-      saveOutfit()
-    }
-  }
-  
   var body: some View {
     ZStack {
       NavigationStack {
@@ -38,18 +31,13 @@ struct OutfitView: View {
           VStack {
             OutfitItemsView(selectedItems: $selectedItems, outfit: $outfit)
               .toolbar {
-                ToolbarItem(placement: .navigationBarLeading) {
-                  Button("Delete Outfit") {
-                    deleteOutfit()
-                    dismiss()
-                  }
-                  .foregroundStyle(Color(.red))
-                }
                 ToolbarItem(placement: .navigationBarTrailing) {
                   Button("Done") {
                     saveOutfit()
                     dismiss()
                   }
+                  .fontWeight(.bold)
+                  .foregroundStyle(Color("Moonstone"))
                 }
               }
           }

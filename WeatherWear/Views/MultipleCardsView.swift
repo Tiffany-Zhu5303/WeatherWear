@@ -15,10 +15,12 @@ struct MultipleCardsView: View {
   @State private var openAddNewOutfitForm: Bool = false
   @State private var openItemFullscreen: Bool = false
   @State private var newOutfit: Outfit = Outfit()
+  @State private var selectedOutfitCard: Outfit? = nil
   @State private var selectedItem: Item? = nil
   @State private var selectedOutfit: Outfit? = nil
   @State private var selectedFavorite: Favorite? = nil
   @State private var navigateOutfitView: Bool = false
+  @State private var navigateWeatherDetailsView: Bool = false
   @Query var items: [Item]
   @Query var outfits: [Outfit]
   @Query var favorites: [Favorite]
@@ -136,6 +138,15 @@ struct MultipleCardsView: View {
           )
           .onTapGesture {
             selectedOutfit = outfit
+            navigateOutfitView = true
+          }
+          .contextMenu{
+            Button(role: .destructive, action: {
+              outfit.deleteOutfit(modelContext: modelContext)
+            }) {
+                Text("Delete")
+                Image(systemName: "trash")
+            }
           }
       }
     }
@@ -200,7 +211,7 @@ struct MultipleCardsView: View {
     NavigationStack {
       ZStack {
         VStack{
-          WeatherTopBarView()
+          WeatherTopBarView(navigateToWeatherDetails: $navigateWeatherDetailsView)
           CategorySelector(categoryState: categoryStateBinding)
             .padding(.vertical)
           Spacer()
@@ -214,15 +225,6 @@ struct MultipleCardsView: View {
         )) {
           if selectedItem != nil {
             ItemView(item: $selectedItem)
-          }
-        }
-        .fullScreenCover(isPresented: Binding(
-          get: { selectedOutfit != nil },
-          set: { if !$0 { selectedOutfit = nil } }
-        )) {
-          if let selectedOutfit = selectedOutfit {
-            OutfitView(
-              outfit: Binding(get: { selectedOutfit }, set: { self.selectedOutfit = $0 }))
           }
         }
         if(openAddNewItemForm) {
@@ -255,13 +257,19 @@ struct MultipleCardsView: View {
       .navigationDestination(isPresented: $navigateOutfitView) {
         if let selectedOutfit = selectedOutfit {
           OutfitView(
-            outfit: Binding(get: { selectedOutfit }, set: { self.selectedOutfit = $0 }))
+            outfit: Binding(get: { selectedOutfit }, set: { _ in self.selectedOutfit = nil }))
           .onDisappear{
             navigateOutfitView = false
           }
         } else {
           Text("No outfit selected")
         }
+      }
+      .navigationDestination(isPresented: $navigateWeatherDetailsView) {
+        WeatherDetailView()
+          .onDisappear{
+            navigateWeatherDetailsView = false
+          }
       }
     }
   }

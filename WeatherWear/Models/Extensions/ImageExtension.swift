@@ -13,14 +13,30 @@ extension UIImage {
   /// - Parameter data: The Data representing the image.
   /// - Returns: A UIImage, or nil if the data cannot be converted.
   static func from(data: Data) -> UIImage? {
-      return UIImage(data: data)
+    return UIImage(data: data)
+  }
+  
+  /// Creates a UIimage from UIColor
+  /// - Parameter color: UIColor for UIImage
+  /// - Parameter size: CGSize for size of UIImage
+  /// - Returns: A UIImage of the color block
+  static func generateColorBlock(
+    color: UIColor,
+    size: CGSize = CGSize(width: Settings.thumbnailSize.width, height: Settings.thumbnailSize.height)
+  ) -> UIImage {
+    let renderer = UIGraphicsImageRenderer(size: size)
+    return renderer.image { context in
+      color.setFill()
+      context.fill(CGRect(origin: .zero, size: size))
+    }
   }
 }
+
 // MARK: - SAVE, LOAD AND DELETE IMAGE FILE
 extension UIImage {
   static var minsize = CGSize(width: 300, height: 200)
   static var maxSize = CGSize(width: 1000, height: 1500)
-
+  
   func save(to filename: String? = nil) -> String {
     // first resize large images
     let image = resizeLargeImage()
@@ -39,7 +55,7 @@ extension UIImage {
     }
     return path
   }
-
+  
   static func load(uuidString: String) -> UIImage? {
     guard uuidString != "none" else { return nil }
     let url = URL.documentsDirectory.appendingPathComponent(uuidString)
@@ -49,7 +65,7 @@ extension UIImage {
       return nil
     }
   }
-
+  
   static func remove(name: String?) {
     if let name {
       let url = URL.documentsDirectory.appendingPathComponent(name)
@@ -63,7 +79,7 @@ extension UIImage {
   func initialSize() -> CGSize {
     var width = Settings.defaultElementSize.width
     var height = Settings.defaultElementSize.height
-
+    
     if self.size.width >= self.size.height {
       width = max(Self.minsize.width, width)
       width = min(Self.maxSize.width, width)
@@ -75,7 +91,7 @@ extension UIImage {
     }
     return CGSize(width: width, height: height)
   }
-
+  
   static func imageSize(named imageName: String) -> CGSize {
     if let image = UIImage(named: imageName) {
       return image.initialSize()
@@ -89,8 +105,8 @@ extension UIImage {
   func resizeLargeImage() -> UIImage {
     let defaultSize: CGFloat = 1000
     if size.width <= defaultSize ||
-      size.height <= defaultSize { return self }
-
+        size.height <= defaultSize { return self }
+    
     let scale: CGFloat
     if size.width >= size.height {
       scale = defaultSize / size.width
@@ -102,7 +118,7 @@ extension UIImage {
       height: size.height * scale)
     return resize(to: newSize)
   }
-
+  
   func resize(to size: CGSize) -> UIImage {
     // UIGraphicsImageRenderer sets scale to device's screen scale
     // change the scale to 1 to get the real image size
@@ -113,27 +129,3 @@ extension UIImage {
     }
   }
 }
-
-/*
- 1. MainActor ensures that a method is performed on the main dispatch queue. Any time you are dealing with views, you should be on the main thread. Note that any method that calls UIImage.screenshot(card:size:) must also be marked with MainActor, otherwise it will not compile.
- 2. Load the card into a view and extract the content. Specifying the size of the content, means that you can scale it to any size preview you want.
- 3. Render the image from the view. ImageRender<Content> initializes with a view and draws it to a Canvas. You can render shapes or text or any other View to an image.
- 4. Extract a UIImage from the rendered image, but if there’s an error, use the error image in the asset catalog.
- */
-
-//extension UIImage {
-//  // 1
-//  @MainActor static func screenshot(
-//    card: Card,
-//    size: CGSize
-//  ) -> UIImage {
-//    // 2
-//    let cardView = ShareCardView(card: card)
-//    let content = cardView.content(size: size)
-//    // 3
-//    let renderer = ImageRenderer(content: content)
-//    // 4
-//    let uiImage = renderer.uiImage ?? UIImage.errorImage
-//    return uiImage
-//  }
-//}

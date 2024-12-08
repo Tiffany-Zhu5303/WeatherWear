@@ -16,7 +16,7 @@ class Outfit: Identifiable {
   @Attribute var dateAdded: Date
   @Attribute var transforms: [UUID: Transform] = [:]
   @Attribute var thumbnail: Data
-  @Relationship var items: [Item]
+  @Relationship(deleteRule: .nullify) var items: [Item]
   
   init(
     name: String = "\(Date().formatted(date: .abbreviated, time: .shortened)) outfit",
@@ -27,7 +27,7 @@ class Outfit: Identifiable {
     self.name = name
     self.dateAdded = dateAdded
     self.items = items
-    self.thumbnail = thumbnail ?? UIImage(named:"error-image")!.pngData()!
+    self.thumbnail = thumbnail ?? UIImage.generateColorBlock(color: .white).pngData()!
     self.transforms = items.reduce(into: [:]) { result, item in
       result[item.id] = Transform()
     }
@@ -46,25 +46,14 @@ class Outfit: Identifiable {
   func removeItemFromOutfit(_ item: Item) {
     self.items.removeAll(where: { $0.id == item.id })
   }
-}
-
-class ExistingOutfits: ObservableObject {
-  @Published var outfits: [Outfit] = []
   
-  func addItemToOutfit(_ item: Item, outfitId: UUID) {
-    let outfit = self.outfits.firstIndex(where: {$0.id == outfitId})
-    if let outfit {
-      self.outfits[outfit].items.append(item)
-      self.outfits[outfit].transforms[item.id] = Transform()
-    } else {
-      print("Outfit not found")
-    }
-  }
-  
-  func removeItemFromOutfit(_ item: Item, outfitId: UUID) {
-    let outfit = self.outfits.firstIndex(where: {$0.id == outfitId})
-    if let outfit {
-      self.outfits[outfit].items.removeAll(where: { $0.id == item.id })
+  func deleteOutfit(modelContext: ModelContext) {
+    modelContext.delete(self)
+    do {
+      try modelContext.save()
+      print("outfit deleted successfully")
+    } catch {
+      print("outfit deletion unsuccessful: \(error.localizedDescription)")
     }
   }
 }

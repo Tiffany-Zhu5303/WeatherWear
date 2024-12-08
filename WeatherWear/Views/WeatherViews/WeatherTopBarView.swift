@@ -8,6 +8,8 @@
 import SwiftUI
 
 struct WeatherTopBarView: View {
+  @Binding var navigateToWeatherDetails: Bool
+  
   var formattedCurrentDate: String {
     let dateFormatter = DateFormatter()
     dateFormatter.dateFormat = "EEE, MMM d"
@@ -19,8 +21,7 @@ struct WeatherTopBarView: View {
       VStack {
         Text("\(formattedCurrentDate)")
           .font(.title3)
-        Text("New York")
-        WeatherView()
+        CurrentWeatherView()
       }
       .fontWeight(.bold)
       Spacer()
@@ -30,6 +31,9 @@ struct WeatherTopBarView: View {
         .frame(
           width: 60,
           height: 60)
+        .onTapGesture {
+          navigateToWeatherDetails = true
+        }
     }
     .foregroundStyle(Color("Moonstone"))
     .padding(
@@ -39,5 +43,5 @@ struct WeatherTopBarView: View {
 }
 
 #Preview {
-    WeatherTopBarView()
+  WeatherTopBarView(navigateToWeatherDetails: .constant(false))
 }
