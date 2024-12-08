@@ -61,23 +61,29 @@ struct ToolbarItems: View {
   }
   
   private func saveOutfit() {
-      do {
-          try modelContext.save()
-          print("Outfit successfully saved!")
-      } catch {
-          print("Failed to save outfit: \(error)")
+    do {
+      try modelContext.save()
+      print("Items saved in this outfit from items toolbar")
+      for item in outfit.items {
+        print("\(item.itemType)")
       }
+      print("Outfit successfully saved!")
+    } catch {
+      print("Failed to save outfit: \(error)")
+    }
   }
   
   private func addItemToOutfit(_ item: Item) {
     selectedItems[item.category] = item
     outfit.addItemToOutfit(item)
+    print("Saving from add Item to outfit...")
     saveOutfit()
   }
   
   private func removeItemFromOutfit(_ item: Item) {
     selectedItems[item.category] = nil
     outfit.removeItemFromOutfit(item)
+    print("Saving from removeItemFromOutfit...")
     saveOutfit()
   }
   
@@ -172,7 +178,7 @@ struct ItemToolbar: View {
             .background(
               RoundedRectangle(cornerRadius: 10)
                 .fill(modal == selection ? Color.white : Color.clear)
-              )
+            )
             .foregroundStyle(Color("Moonstone"))
             .overlay(
               RoundedRectangle(cornerRadius: 10)
@@ -187,8 +193,8 @@ struct ItemToolbar: View {
             outfit: $outfit,
             currentItems: $modal,
             selectedItems: $selectedItems)
-            .padding(.top, 100)
-            .padding(.horizontal, 10)
+          .padding(.top, 100)
+          .padding(.horizontal, 10)
         }
       }
       .ignoresSafeArea()
@@ -204,5 +210,5 @@ struct ItemToolbar: View {
     modal: .constant(.tops),
     selectedItems: .constant([:])
   )
-    .padding()
+  .padding()
 }

@@ -6,17 +6,23 @@
 //
 
 import SwiftUI
+import SwiftData
 
 struct ItemView: View {
   @Environment(\.dismiss) var dismiss
   @Environment(\.modelContext) var modelContext
   @Binding var item: Item?
+  @Query var outfits: [Outfit]
   
   private func deleteItem() {
     guard let itemToDelete = item
     else {
       print("Deleting item failed")
       return
+    }
+    
+    for outfit in outfits.filter({ $0.items.contains(where: { $0.id == itemToDelete.id }) }) {
+      outfit.items.removeAll { $0.id == itemToDelete.id }
     }
     
     modelContext.delete(itemToDelete)

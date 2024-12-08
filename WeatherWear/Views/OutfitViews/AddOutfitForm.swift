@@ -66,7 +66,7 @@ struct OutfitFormInput: View {
           .fill(Color("MintGreen").opacity(0.5))
       )
       .padding(.vertical, 20)
-      NavigationStack {
+//      NavigationStack {
         VStack {
           Button("Create Outfit"){
             addOutfit()
@@ -76,12 +76,12 @@ struct OutfitFormInput: View {
             RoundedRectangle(cornerRadius: 10)
               .stroke(Color("Moonstone"), lineWidth: 2)
           )
-          .navigationDestination(isPresented: $navigateOutfitView) {
-            OutfitView(outfit: $outfit)
-          }
+//          .navigationDestination(isPresented: $navigateOutfitView) {
+//            OutfitView(outfit: $outfit)
+//          }
         }
       }
-    }
+//    }
     .alert("Incomplete Form", isPresented: $showAlert) {
       Button("Ok", role: .cancel) {}
     } message: {
@@ -123,6 +123,9 @@ struct AddOutfitForm: View {
       height: 350,
       alignment: .top
     )
+    .onDisappear {
+      outfit = Outfit()
+    }
   }
 }
 

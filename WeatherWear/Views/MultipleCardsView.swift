@@ -21,8 +21,8 @@ struct MultipleCardsView: View {
   @State private var selectedFavorite: Favorite? = nil
   @State private var navigateOutfitView: Bool = false
   @State private var navigateWeatherDetailsView: Bool = false
-  @Query var items: [Item]
-  @Query var outfits: [Outfit]
+  @Query(sort: [SortDescriptor(\Item.dateAdded, order: .forward)]) var items: [Item]
+  @Query(sort: [SortDescriptor(\Outfit.dateAdded, order: .forward)])  var outfits: [Outfit]
   @Query var favorites: [Favorite]
   
   var columns: [GridItem] {
@@ -219,6 +219,14 @@ struct MultipleCardsView: View {
             itemList
           }
         }
+        .onAppear {
+          print("Outfits:\(outfits.count), Items:\(items.count), Favorites:\(favorites.count)")
+          if(outfits.count != 0) {
+            for outfit in outfits {
+              print("\(outfit.items.count)")
+            }
+          }
+        }
         .fullScreenCover(isPresented: Binding(
           get: { selectedItem != nil },
           set: { if !$0 { selectedItem = nil } }
@@ -250,7 +258,7 @@ struct MultipleCardsView: View {
             navigateOutfitView: $navigateOutfitView
           )
           .onDisappear {
-            selectedOutfit = newOutfit
+            newOutfit = Outfit()
           }
         }
       }
@@ -259,6 +267,7 @@ struct MultipleCardsView: View {
           OutfitView(
             outfit: Binding(get: { selectedOutfit }, set: { _ in self.selectedOutfit = nil }))
           .onDisappear{
+            self.selectedOutfit = nil
             navigateOutfitView = false
           }
         } else {

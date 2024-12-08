@@ -40,6 +40,9 @@ struct WeatherChartView: View {
       
       if let selectedDate, let times = weatherData[selectedDate] {
         let sortedTimes = sortTimes(times: Array(times.keys))
+        let temperatures = times.values
+        let minTemperature = temperatures.min() ?? 0
+        let maxTemperature = temperatures.max() ?? 100
 
         Chart {
           ForEach(Array(sortedTimes), id: \.self) { time in
@@ -61,13 +64,7 @@ struct WeatherChartView: View {
               }
           }
         }
-        .chartYAxis {
-          AxisMarks(values: .stride(by: 2)) { value in
-              AxisValueLabel()
-              AxisTick()
-              AxisGridLine()
-          }
-        }
+        .chartYScale(domain: minTemperature-10...maxTemperature+10)
         .padding(.all, 20)
       } else{
         Text("Please select a date to view the weather.")

@@ -34,8 +34,10 @@ struct OutfitItemsView: View {
               selectedItem = item
             }
             .onAppear{
-              selectedItems[item.category] = item
-              print("selectedItems: \(String(describing: outfit.transforms[item.id]?.size))")
+              if selectedItems[item.category] != item {
+                  selectedItems[item.category] = item
+                  print("selectedItems: \(String(describing: selectedItems))")
+              }
             }
             .onDisappear{
               if !capturedThumbnail {

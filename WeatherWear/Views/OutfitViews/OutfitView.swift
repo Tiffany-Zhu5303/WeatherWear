@@ -18,6 +18,10 @@ struct OutfitView: View {
   private func saveOutfit() {
     do {
       try modelContext.save()
+      print("Items saved in this outfit from OutfitView")
+      for item in outfit.items {
+        print("\(item.itemType)")
+      }
       print("Outfit successfully saved!")
     } catch {
       print("Failed to save outfit: \(error)")
@@ -49,6 +53,10 @@ struct OutfitView: View {
         }
         .navigationBarBackButtonHidden(true)
         .onAppear{
+          print("OnAppear in outfitView")
+          for item in outfit.items {
+            print("\(item.itemType)")
+          }
           selectedItems = Dictionary(uniqueKeysWithValues: outfit.items.compactMap { item in
               (item.category, item)
           })
