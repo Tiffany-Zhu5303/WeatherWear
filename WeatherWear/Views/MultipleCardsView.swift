@@ -8,6 +8,25 @@
 import SwiftUI
 import SwiftData
 
+struct ImageOverlay: View {
+  let imageData: Data
+  
+  var body: some View {
+    if let uiImage = UIImage(data: imageData) {
+      Image(uiImage: uiImage)
+        .resizable()
+        .scaledToFit()
+        .frame(
+          width: Settings.thumbnailSize.width * 0.8,
+          height: Settings.thumbnailSize.height * 0.8)
+        .clipped()
+    } else {
+      Text("No Image")
+        .foregroundColor(.gray)
+    }
+  }
+}
+
 struct MultipleCardsView: View {
   @Environment(\.modelContext) var modelContext
   @AppStorage("categoryState") private var categoryStateRawValue: Int = CategoryState.outfits.rawValue
@@ -90,29 +109,20 @@ struct MultipleCardsView: View {
     }
   }
   
+  var card: some View {
+    CardThumbnailView()
+      .frame(
+        width: Settings.thumbnailSize.width,
+        height: Settings.thumbnailSize.height
+      )
+  }
+  
   var displayItems: some View {
     ForEach(items) { item in
       VStack(alignment: .leading) {
-        CardThumbnailView()
-          .frame(
-            width: Settings.thumbnailSize.width,
-            height: Settings.thumbnailSize.height
-          )
+        card
           .overlay(
-            Group {
-              if let uiImage = UIImage(data: item.image) {
-                Image(uiImage: uiImage)
-                  .resizable()
-                  .scaledToFit()
-                  .frame(
-                    width: Settings.thumbnailSize.width * 0.8,
-                    height: Settings.thumbnailSize.height * 0.8)
-                  .clipped()
-              } else {
-                Text("No Image")
-                  .foregroundColor(.gray)
-              }
-            }
+            ImageOverlay(imageData: item.image)
           )
           .onTapGesture {
             DispatchQueue.main.async {
@@ -135,25 +145,9 @@ struct MultipleCardsView: View {
   var displayOutfits: some View {
     ForEach(outfits) { outfit in
       VStack(alignment: .leading) {
-        CardThumbnailView()
-          .frame(
-            width: Settings.thumbnailSize.width,
-            height: Settings.thumbnailSize.height
-          )
+        card
           .overlay(
-            Group {
-              if let uiImage = UIImage(data: outfit.thumbnail) {
-                Image(uiImage: uiImage)
-                  .resizable()
-                  .scaledToFill()
-                  .frame(
-                    width: Settings.thumbnailImageSize.width,
-                    height: Settings.thumbnailImageSize.height)
-              } else {
-                Text("No Image")
-                  .foregroundColor(.gray)
-              }
-            }
+            ImageOverlay(imageData: outfit.thumbnail)
           )
           .onTapGesture {
             selectedOutfit = outfit
@@ -181,24 +175,14 @@ struct MultipleCardsView: View {
   var displayFavorites: some View {
     ForEach(favorites) { favorite in
       VStack(alignment: .leading) {
-        CardThumbnailView()
-          .frame(
-            width: Settings.thumbnailSize.width,
-            height: Settings.thumbnailSize.height
-          )
+        card
           .overlay(
             Group {
-              //              if let uiImage = UIImage(data: favorites[index].image) {
-              //                Image(uiImage: uiImage)
-              //                  .resizable()
-              //                  .scaledToFill()
-              //                  .frame(
-              //                    width: Settings.thumbnailImageSize.width,
-              //                    height: Settings.thumbnailImageSize.height)
-              //              } else {
-              Text("No Image")
-                .foregroundColor(.gray)
-              //              }
+              if let item = favorite.item {
+                ImageOverlay(imageData: item.image)
+              } else if let outfit = favorite.outfit {
+                ImageOverlay(imageData: outfit.thumbnail)
+              }
             }
           )
           .onTapGesture {
