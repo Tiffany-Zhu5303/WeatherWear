@@ -196,7 +196,6 @@ struct ItemToolbar: View {
             currentItems: $modal,
             selectedItems: $selectedItems)
           .padding(.top, 100)
-          .padding(.horizontal, 10)
         }
       }
       .ignoresSafeArea()

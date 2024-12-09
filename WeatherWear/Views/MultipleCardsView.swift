@@ -278,6 +278,7 @@ struct MultipleCardsView: View {
         }
       }
       .padding(.top)
+      .padding(.horizontal)
       .onChange(of: categoryState) {
         print("Current Category: \(categoryState)")
         print("Items: \(items.count), Outfits: \(outfits.count), Favorites: \(favorites.count)")

@@ -90,7 +90,6 @@ struct AddImagePopup: View {
           }
         }
       }
-      .frame(width: 350)
       .padding([.vertical, .horizontal])
       .foregroundStyle(Color("Moonstone"))
       .background(Color("AntiFlashWhite"))

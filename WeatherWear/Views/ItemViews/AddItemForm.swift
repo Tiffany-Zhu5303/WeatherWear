@@ -20,7 +20,7 @@ struct AddItemForm: View {
   @Binding var showForm: Bool
   
   let itemCategories = ["Tops", "Bottoms", "Shoes", "Accessories"]
-  var defaultOptions = ["Shirt", "Pants", "Shoes"]
+//  var defaultOptions = ["Shirt", "Pants", "Shoes"]
   
   func addItem() {
     guard let selectedSubType = selectedSubType,
@@ -76,6 +76,11 @@ struct AddItemForm: View {
               }
             }
           }
+          .frame(
+            maxWidth: .infinity,
+            alignment: .leading
+          )
+          .padding(.horizontal, 30)
           HStack {
             Text("Item Type: ")
               .font(.title3)
@@ -84,13 +89,13 @@ struct AddItemForm: View {
               Text("Choose a type")
                 .tag(nil as ItemCategory?)
                 .disabled(true)
-              if(categories.isEmpty){
-                // for testing in preview
-                ForEach(defaultOptions, id:\.self){ categoryName in
-                  Text(categoryName)
-                    .tag(ItemCategory(name: categoryName) as ItemCategory?)
-                }
-              } else {
+//              if(categories.isEmpty){
+//                // for testing in preview
+//                ForEach(defaultOptions, id:\.self){ categoryName in
+//                  Text(categoryName)
+//                    .tag(ItemCategory(name: categoryName) as ItemCategory?)
+//                }
+//              } else {
                 ForEach(categories) { category in
                   Text(category.name)
                     .tag(Optional(category))
@@ -98,12 +103,12 @@ struct AddItemForm: View {
               }
             }
             .pickerStyle(MenuPickerStyle())
-          }
+//          }
           .frame(
             maxWidth: .infinity,
             alignment: .leading
           )
-          .padding(.horizontal, 60)
+          .padding(.horizontal, 30)
           HStack {
             Button(action: {
               addNewType = true
@@ -128,7 +133,7 @@ struct AddItemForm: View {
             maxWidth: .infinity,
             alignment: .leading
           )
-          .padding(.horizontal, 60)
+          .padding(.horizontal, 30)
           .padding(.bottom, 10)
           ZStack {
             Rectangle()
@@ -170,15 +175,13 @@ struct AddItemForm: View {
         .cornerRadius(10)
         .padding(.top, 20)
       }
+      .padding()
       .background(
         RoundedRectangle(cornerRadius: 15)
           .foregroundStyle(Color.white)
           .shadow(
             color: Color.black.opacity(0.2),
             radius: 5, x: 0.0, y: 0.0)
-          .frame(
-            width: 350,
-            height: 600)
       )
       if(openImagePopup) {
         Color.gray.opacity(0.1)
@@ -214,6 +217,9 @@ struct AddItemForm: View {
     } message: {
       Text("Please select a category and image before adding the item.")
     }
+    .frame(
+      width: 350,
+      height: 600)
   }
 }
 

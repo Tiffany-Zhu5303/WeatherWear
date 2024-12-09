@@ -54,6 +54,7 @@ struct WeatherChartView: View {
               .foregroundStyle(Color("Moonstone"))
               .symbol(.circle)
               .interpolationMethod(.catmullRom)
+
             }
           }
         }
@@ -63,8 +64,16 @@ struct WeatherChartView: View {
                 AxisValueLabel(stringValue, orientation: .verticalReversed)
               }
           }
+          
         }
-        .chartYScale(domain: minTemperature-10...maxTemperature+10)
+        .chartYAxis {
+          AxisMarks(position: .leading, values: .stride(by: 5)) { value in
+              if let temperature = value.as(Int.self) {
+                  AxisValueLabel("\(temperature)°F")
+              }
+          }
+        }
+        .chartYScale(domain: minTemperature-5...maxTemperature+5)
         .padding(.all, 20)
       } else{
         Text("Please select a date to view the weather.")
