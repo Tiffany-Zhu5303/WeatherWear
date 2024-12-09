@@ -17,12 +17,14 @@ class Outfit: Identifiable {
   @Attribute var transforms: [UUID: Transform] = [:]
   @Attribute var thumbnail: Data
   @Relationship(deleteRule: .nullify) var items: [Item]
+  @Relationship(deleteRule: .cascade) var favorite: Favorite?
   
   init(
     name: String = "\(Date().formatted(date: .abbreviated, time: .shortened)) outfit",
     dateAdded: Date = .now,
     thumbnail: Data? = nil,
-    items: [Item] = []
+    items: [Item] = [],
+    favorite: Favorite? = nil
   ){
     self.name = name
     self.dateAdded = dateAdded
@@ -31,6 +33,7 @@ class Outfit: Identifiable {
     self.transforms = items.reduce(into: [:]) { result, item in
       result[item.id] = Transform()
     }
+    self.favorite = favorite
   }
   
   // Helper method to update the transform for an item in the outfit

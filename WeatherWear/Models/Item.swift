@@ -16,8 +16,14 @@ class Item: Identifiable {
   @Attribute var image: Data
   @Attribute var itemType: String
   @Relationship var category: ItemCategory
+  @Relationship(deleteRule: .cascade) var favorite: Favorite?
 
-  init(dateAdded: Date = .now, image: Data? = nil, itemType: String = "", category: ItemCategory = ItemCategory(name: "Default")) {
+  init(
+    dateAdded: Date = .now,
+    image: Data? = nil,
+    itemType: String = "",
+    category: ItemCategory = ItemCategory(name: "Default"),
+    favorite: Favorite? = nil) {
     self.dateAdded = dateAdded
     self.image = image ?? UIImage(systemName: "hanger")?.pngData() ?? UIImage(named:"error-image")!.pngData()!
     self.itemType = itemType
