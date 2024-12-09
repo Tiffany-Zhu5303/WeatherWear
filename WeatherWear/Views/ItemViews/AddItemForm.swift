@@ -10,16 +10,17 @@ import SwiftData
 
 struct AddItemForm: View {
   @Environment(\.modelContext) private var modelContext
-  @Query var categories: [ItemCategory]
+  @Query(sort: [SortDescriptor(\ItemCategory.name, order: .forward)]) @MainActor var categories: [ItemCategory]
   @State private var showAlert: Bool = false
   @State private var selectedSubType: ItemCategory? = nil
   @State private var selectedType: String? = nil
   @State private var imageData: Data? = nil
   @State private var openImagePopup: Bool = false
+  @State private var addNewType: Bool = false
   @Binding var showForm: Bool
   
+  let itemCategories = ["Tops", "Bottoms", "Shoes", "Accessories"]
   var defaultOptions = ["Shirt", "Pants", "Shoes"]
-  var itemTypes = ["Tops", "Bottoms", "Shoes", "Accessories"]
   
   func addItem() {
     guard let selectedSubType = selectedSubType,
@@ -43,6 +44,16 @@ struct AddItemForm: View {
     }
   }
   
+  func deleteItemCategory(itemCategory: ItemCategory) {
+    do {
+      modelContext.delete(itemCategory)
+      try modelContext.save()
+      print("ItemCategory deleted!")
+    } catch {
+      print("Error deleting itemCategory: \(error)")
+    }
+  }
+  
   var body: some View {
     ZStack {
       VStack {
@@ -50,7 +61,7 @@ struct AddItemForm: View {
           .font(.title2)
           .fontWeight(.bold)
           .foregroundStyle(Color("Moonstone"))
-          .padding(.bottom, 30)
+          .padding(.bottom, 10)
         Group {
           HStack {
             Text("Category: ")
@@ -59,11 +70,9 @@ struct AddItemForm: View {
             Picker("Category: ", selection: $selectedType) {
               Text("Choose a category")
                 .tag(nil as String?)
-                .foregroundColor(Color("Moonstone"))
-              ForEach(itemTypes, id:\.self) { type in
+              ForEach(itemCategories, id:\.self) { type in
                 Text(type)
                   .tag(Optional(type))
-                  .foregroundStyle(Color("Moonstone"))
               }
             }
           }
@@ -74,8 +83,9 @@ struct AddItemForm: View {
             Picker("Sub-categories: ", selection: $selectedSubType) {
               Text("Choose a type")
                 .tag(nil as ItemCategory?)
-                .foregroundColor(Color("Moonstone"))
+                .disabled(true)
               if(categories.isEmpty){
+                // for testing in preview
                 ForEach(defaultOptions, id:\.self){ categoryName in
                   Text(categoryName)
                     .tag(ItemCategory(name: categoryName) as ItemCategory?)
@@ -84,12 +94,42 @@ struct AddItemForm: View {
                 ForEach(categories) { category in
                   Text(category.name)
                     .tag(Optional(category))
-                    .foregroundStyle(Color("Moonstone"))
                 }
               }
             }
             .pickerStyle(MenuPickerStyle())
           }
+          .frame(
+            maxWidth: .infinity,
+            alignment: .leading
+          )
+          .padding(.horizontal, 60)
+          HStack {
+            Button(action: {
+              addNewType = true
+            }) {
+              Image(systemName: "plus.circle.fill")
+                .frame(
+                  width: 5,
+                  height: 5
+                )
+              Text("New Item Type")
+                .font(.caption)
+            }
+            .padding(9)
+            .overlay(
+              RoundedRectangle(cornerRadius: 10)
+                .stroke(Color("Moonstone"), lineWidth: 2)
+            )
+            .cornerRadius(10)
+          }
+          .foregroundStyle(Color("Moonstone"))
+          .frame(
+            maxWidth: .infinity,
+            alignment: .leading
+          )
+          .padding(.horizontal, 60)
+          .padding(.bottom, 10)
           ZStack {
             Rectangle()
               .stroke(
@@ -119,9 +159,15 @@ struct AddItemForm: View {
             openImagePopup = true
           }
         }
-        Button("Add item") {
+        Button(action: {
           addItem()
+        }) {
+          Text("Add Item")
+            .padding(10)
         }
+        .background(Color("Moonstone"))
+        .foregroundStyle(Color("MintGreen"))
+        .cornerRadius(10)
         .padding(.top, 20)
       }
       .background(
@@ -132,7 +178,7 @@ struct AddItemForm: View {
             radius: 5, x: 0.0, y: 0.0)
           .frame(
             width: 350,
-            height: 550)
+            height: 600)
       )
       if(openImagePopup) {
         Color.gray.opacity(0.1)
@@ -145,6 +191,20 @@ struct AddItemForm: View {
           Spacer()
           AddImagePopup(imageData: $imageData, showPopup: $openImagePopup)
             .transition(.move(edge: .bottom))
+        }
+        .zIndex(1)
+      }
+      if(addNewType) {
+        Color.gray.opacity(0.1)
+          .blur(radius: 10)
+          .onTapGesture {
+            addNewType = false
+          }
+        VStack {
+          Spacer()
+          AddNewItemCategoryView(showForm: $addNewType)
+            .transition(.move(edge: .bottom))
+          Spacer()
         }
         .zIndex(1)
       }

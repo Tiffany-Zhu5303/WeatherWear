@@ -16,15 +16,6 @@ struct OutfitFormInput: View {
   @Binding var navigateOutfitView: Bool
   @Binding var showForm: Bool
   
-//  private func saveOutfit() {
-//      do {
-//          try modelContext.save()
-//          print("Outfit successfully saved!")
-//      } catch {
-//          print("Failed to save outfit: \(error)")
-//      }
-//  }
-  
   private func addOutfit() {
     guard !outfit.name.isEmpty
     else {
@@ -38,7 +29,6 @@ struct OutfitFormInput: View {
     modelContext.insert(outfit)
 
     print("inserted\(outfit.id)")
-//    saveOutfit()
     
     DispatchQueue.main.async {
         selectedOutfit = outfit
@@ -69,7 +59,6 @@ struct OutfitFormInput: View {
           .fill(Color("MintGreen").opacity(0.5))
       )
       .padding(.vertical, 20)
-//      NavigationStack {
         VStack {
           Button("Create Outfit"){
             addOutfit()
@@ -79,12 +68,8 @@ struct OutfitFormInput: View {
             RoundedRectangle(cornerRadius: 10)
               .stroke(Color("Moonstone"), lineWidth: 2)
           )
-//          .navigationDestination(isPresented: $navigateOutfitView) {
-//            OutfitView(outfit: $outfit)
-//          }
         }
       }
-//    }
     .alert("Incomplete Form", isPresented: $showAlert) {
       Button("Ok", role: .cancel) {}
     } message: {

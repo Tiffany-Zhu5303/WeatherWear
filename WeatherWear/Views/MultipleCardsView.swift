@@ -27,6 +27,28 @@ struct ImageOverlay: View {
   }
 }
 
+struct ShareImagePopup: View {
+  let imageData: Data
+  
+  var body: some View {
+    Button(action: {
+      let image = UIImage(data: imageData)
+      if let image = image {
+        let shareController = UIActivityViewController(
+          activityItems: [image],
+          applicationActivities: nil
+        )
+        if let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
+           let rootVC = windowScene.windows.first?.rootViewController {
+          rootVC.present(shareController, animated: true)
+        }
+      }
+    }){
+      Label("Share", systemImage: "square.and.arrow.up")
+    }
+  }
+}
+
 struct MultipleCardsView: View {
   @Environment(\.modelContext) var modelContext
   @AppStorage("categoryState") private var categoryStateRawValue: Int = CategoryState.outfits.rawValue
@@ -37,7 +59,6 @@ struct MultipleCardsView: View {
   @State private var selectedOutfitCard: Outfit? = nil
   @State private var selectedItem: Item? = nil
   @State private var selectedOutfit: Outfit? = nil
-  @State private var selectedFavorite: Favorite? = nil
   @State private var navigateOutfitView: Bool = false
   @State private var navigateWeatherDetailsView: Bool = false
   @Query(sort: [SortDescriptor(\Item.dateAdded, order: .forward)]) @MainActor var items: [Item]
@@ -130,12 +151,30 @@ struct MultipleCardsView: View {
             }
           }
           .contextMenu{
-            Button(action: {
-              let favorite = Favorite(item: item)
-              addFavorite(favorite: favorite)
-            }){
-              Text("Favorite")
-              Image(systemName: "heart")
+            ShareImagePopup(imageData: item.image)
+            if favorites.contains(where: {$0.item?.id == item.id}) {
+              Button(role: .destructive, action: {
+                if let favorite = favorites.first(where: { $0.item?.id == item.id }) {
+                  favorite.deleteFavorite(modelContext: modelContext)
+                }
+              }) {
+                Text("Unfavorite")
+                Image(systemName: "heart")
+              }
+            } else {
+              Button(action: {
+                let favorite = Favorite(item: item)
+                addFavorite(favorite: favorite)
+              }){
+                Text("Favorite")
+                Image(systemName: "heart")
+              }
+            }
+            Button(role: .destructive, action: {
+              item.deleteItem(modelContext: modelContext)
+            }) {
+              Text("Delete")
+              Image(systemName: "trash")
             }
           }
       }
@@ -154,18 +193,30 @@ struct MultipleCardsView: View {
             navigateOutfitView = true
           }
           .contextMenu{
-            Button(action: {
-              let favorite = Favorite(outfit: outfit)
-              addFavorite(favorite: favorite)
-            }){
-              Text("Favorite")
-              Image(systemName: "heart")
+            ShareImagePopup(imageData: outfit.thumbnail)
+            if favorites.contains(where: {$0.outfit?.id == outfit.id}) {
+              Button(role: .destructive, action: {
+                if let favorite = favorites.first(where: { $0.outfit?.id == outfit.id }) {
+                  favorite.deleteFavorite(modelContext: modelContext)
+                }
+              }) {
+                Text("Unfavorite")
+                Image(systemName: "heart")
+              }
+            } else {
+              Button(action: {
+                let favorite = Favorite(outfit: outfit)
+                addFavorite(favorite: favorite)
+              }){
+                Text("Favorite")
+                Image(systemName: "heart")
+              }
             }
             Button(role: .destructive, action: {
               outfit.deleteOutfit(modelContext: modelContext)
             }) {
-                Text("Delete")
-                Image(systemName: "trash")
+              Text("Delete")
+              Image(systemName: "trash")
             }
           }
       }
@@ -186,7 +237,25 @@ struct MultipleCardsView: View {
             }
           )
           .onTapGesture {
-            selectedFavorite = favorite
+            if let item = favorite.item {
+              selectedItem = item
+            } else if let outfit = favorite.outfit {
+              selectedOutfit = outfit
+              navigateOutfitView = true
+            }
+          }
+          .contextMenu{
+            if let item = favorite.item {
+              ShareImagePopup(imageData: item.image)
+            } else if let outfit = favorite.outfit {
+              ShareImagePopup(imageData: outfit.thumbnail)
+            }
+            Button(role: .destructive, action: {
+              favorite.deleteFavorite(modelContext: modelContext)
+            }) {
+              Text("Unfavorite")
+              Image(systemName: "heart")
+            }
           }
       }
     }

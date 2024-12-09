@@ -69,10 +69,10 @@ struct WeatherDetailView: View {
         .foregroundStyle(Color("Moonstone"))
         .padding(.top)
       Picker("How many days do you want to see?", selection: $selectedForecastDays) {
-        Text("Choose a number of days").tag(nil as Int?)
+        Text("Days of forecast:").tag(nil as Int?)
         ForEach(1..<10) { day in
           if day == 1 {
-            Text("\(day) day (Tomorrow)").tag(day as Int)
+            Text("\(day) day").tag(day as Int)
           } else {
             Text("\(day) days").tag(day as Int)
           }

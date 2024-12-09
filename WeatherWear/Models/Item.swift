@@ -23,4 +23,14 @@ class Item: Identifiable {
     self.itemType = itemType
     self.category = category
   }
+  
+  func deleteItem(modelContext: ModelContext) {
+    modelContext.delete(self)
+    do {
+      try modelContext.save()
+      print("item deleted successfully")
+    } catch {
+      print("item deletion unsuccessful: \(error.localizedDescription)")
+    }
+  }
 }
