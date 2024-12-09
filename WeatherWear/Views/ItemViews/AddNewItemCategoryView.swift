@@ -6,6 +6,55 @@
 //
 
 import SwiftUI
+import SwiftData
+
+struct ExistingItemCategories: View {
+  @Environment(\.modelContext) private var modelContext
+  @Query(sort: [SortDescriptor(\ItemCategory.name, order: .forward)]) @MainActor var categories: [ItemCategory]
+  @State private var categoryToDelete: ItemCategory?
+  
+  var defaultOptions = ["Shirt", "Pants", "Shoes", "Skirt", "jacket"]
+  
+  func deleteItemCategory(itemCategory: ItemCategory) {
+    do {
+      modelContext.delete(itemCategory)
+      try modelContext.save()
+      print("ItemCategory deleted!")
+    } catch {
+      print("Error deleting itemCategory: \(error)")
+    }
+  }
+  
+  var body: some View {
+    VStack {
+      Text("Item Categories")
+      if categories.isEmpty {
+        List(defaultOptions, id:\.self) { category in
+          Text(category)
+            .font(.caption)
+        }
+      } else {
+        List {
+          ForEach(categories, id:\.id) { category in
+            Text(category.name)
+              .font(.caption)
+          }
+          // Need handling of items with item categories
+          
+          //          .onDelete { offsets in
+          //            for index in offsets {
+          //              categoryToDelete = categories[index]
+          //              deleteItemCategory(itemCategory: categoryToDelete!)
+          //            }
+          //          }
+        }
+      }
+    }
+    .frame(
+      width: 350,
+      height: 250)
+  }
+}
 
 struct ItemCategoryFormInput: View {
   @Environment(\.modelContext) private var modelContext
@@ -27,12 +76,14 @@ struct ItemCategoryFormInput: View {
   
   var body: some View {
     VStack {
+      Text("Add Category")
       HStack {
         TextField("", text: $category.name, prompt: Text("New Category"))
           .font(.caption)
           .padding(.leading, 10)
-          .padding(.horizontal)
-          .frame(width: 275, height: 50)
+          .padding(.vertical)
+          .frame(width: 275)
+          .foregroundStyle(Color("Moonstone"))
           .background(
             RoundedRectangle(cornerRadius: 10)
               .fill(Color.clear)
@@ -43,20 +94,22 @@ struct ItemCategoryFormInput: View {
       }
       .background(
         RoundedRectangle(cornerRadius: 10)
-          .fill(Color("MintGreen").opacity(0.5))
+          .stroke(Color("Moonstone"), lineWidth: 2)
       )
-      .padding(.vertical, 20)
-      VStack {
-        Button("Create Category"){
-          addOutfit()
-        }
-        .padding(5)
-        .background(
-          RoundedRectangle(cornerRadius: 10)
-            .stroke(Color("Moonstone"), lineWidth: 2)
-        )
+      .padding(.vertical, 10)
+      
+      Button("Create Category"){
+        addOutfit()
       }
+      .font(.subheadline)
+      .padding(5)
+      .background(
+        RoundedRectangle(cornerRadius: 10)
+          .stroke(Color("Moonstone"), lineWidth: 2)
+      )
     }
+    .frame(
+      height: 200)
     .alert("Incomplete Form", isPresented: $showAlert) {
       Button("Ok", role: .cancel) {}
     } message: {
@@ -77,22 +130,24 @@ struct AddNewItemCategoryView: View {
           color: Color.black.opacity(0.2),
           radius: 5, x: 0.0, y: 0.0)
         .frame(
-          width: 350,
-          height: 220)
+          width: 350)
       VStack(alignment: .center) {
-        ItemCategoryFormInput(
-          category: $itemCategory,
-          showForm: $showForm
-        )
+        Group {
+          ExistingItemCategories()
+          ItemCategoryFormInput(
+            category: $itemCategory,
+            showForm: $showForm
+          )
+        }
+        .padding(.top, 20)
         .font(.title2)
         .fontWeight(.bold)
         .foregroundStyle(Color("Moonstone"))
-        .padding(.top, 30)
       }
     }
     .frame(
       width: 350,
-      height: 350,
+      height: 450,
       alignment: .top
     )
   }
